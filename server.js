@@ -2,7 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db')
 const userRouter = require('./routes/api/user');
 const authRouter = require('./routes/api/auth');
-const postsRouter = require('./routes/api/post')
+const ticketRouter = require('./routes/api/ticket')
 const profileRouter = require('./routes/api/profile')
 
 const app = express();
@@ -19,6 +19,6 @@ app.get('/', (req, res)=> {
 app.use('/api/users',userRouter);
 app.use('/api/profiles',profileRouter);
 app.use('/api/auth',authRouter);
-app.use('/api/posts',postsRouter);
+app.use('/api/tickets',ticketRouter);
 
 app.listen(PORT, ()=> { console.log(`node started ${PORT}`)})
