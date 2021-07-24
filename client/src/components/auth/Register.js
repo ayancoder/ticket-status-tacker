@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import axios from 'axios';
 import {Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import  setAlert  from '../../actions/alert';
+import  {setAlert}  from '../../actions/alert';
 
 const Register = ({setAlert}) => {
   const [formData, setFormData] = useState({
@@ -104,15 +104,5 @@ const Register = ({setAlert}) => {
     </Fragment>
   );
 };
-
-
-/* Register.propTypes = {
-  setAlert: PropTypes.func.isRequired
-};
- */
-
-/* const mapStateToProps = (state) => ({
-  isAuthenticated: state.auth.isAuthenticated
-}); */
 
 export default connect(null, { setAlert })(Register);
