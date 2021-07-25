@@ -59,19 +59,8 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
   menuButton: {
     marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
   },
   title: {
     flexGrow: 1,
@@ -119,26 +108,46 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [isclose, setIsClose] = React.useState(0);
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const parsedIsClose = true;
+    setIsClose(parsedIsClose);
+  }, []);
+
+  React.useEffect(() => {
+    localStorage.setItem("isclose", isclose);
+  }, [isclose]);
+
   const handleDrawerOpen = () => {
-    setOpen(true);
+    if (isclose === false) {
+      setIsClose(true);
+      setOpen(isclose);
+    } else {
+      setIsClose(false);
+      setOpen(isclose);
+    }
   };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+
+
+  // const handleDrawerClose = () => {
+  //   setOpen(false);
+  // };
+  
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+      <AppBar position="absolute" className={clsx(classes.appBar, open)}>
         <Toolbar className={classes.toolbar}>
           <IconButton
             edge="start"
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+            className={clsx(classes.menuButton, open && classes.menuButtonHidden )}
           >
             <MenuIcon />
           </IconButton>
@@ -159,11 +168,6 @@ export default function Dashboard() {
         }}
         open={open}
       >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
