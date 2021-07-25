@@ -41,7 +41,6 @@ const Register = ({ setAlert, register }) => {
       } catch (err) {
         console.log(err.response.data);
       }  */
-      ///
     }
   };
   return (

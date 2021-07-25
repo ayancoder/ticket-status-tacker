@@ -4,8 +4,6 @@ import { setAlert } from "./alert";
 import { REGISTER_SUCCESS, REGISTER_FAIL } from "./types";
 
 export const register =({ name, email, password }) => async (dispatch) => {
-
-
     const newUser = {
       name,
       email,
