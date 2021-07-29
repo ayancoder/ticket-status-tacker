@@ -16,19 +16,19 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
+import NestedList from './NestedList';
+import {secondaryListItems} from './listItems';
 import Chart from './Chart';
 import Deposits from './Deposits';
-import Orders from './Orders';
+import Tickets from './Ticket';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+        Tux
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -59,19 +59,8 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
   menuButton: {
     marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
   },
   title: {
     flexGrow: 1,
@@ -119,26 +108,46 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [isclose, setIsClose] = React.useState(0);
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const parsedIsClose = true;
+    setIsClose(parsedIsClose);
+  }, []);
+
+  React.useEffect(() => {
+    localStorage.setItem("isclose", isclose);
+  }, [isclose]);
+
   const handleDrawerOpen = () => {
-    setOpen(true);
+    if (isclose === false) {
+      setIsClose(true);
+      setOpen(isclose);
+    } else {
+      setIsClose(false);
+      setOpen(isclose);
+    }
   };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+
+
+  // const handleDrawerClose = () => {
+  //   setOpen(false);
+  // };
+  
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+      <AppBar position="absolute" className={clsx(classes.appBar, open)}>
         <Toolbar className={classes.toolbar}>
           <IconButton
             edge="start"
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+            className={clsx(classes.menuButton, open && classes.menuButtonHidden )}
           >
             <MenuIcon />
           </IconButton>
@@ -159,15 +168,10 @@ export default function Dashboard() {
         }}
         open={open}
       >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
         <Divider />
-        <List>{mainListItems}</List>
+        <NestedList/>
         <Divider />
-        <List>{secondaryListItems}</List>
+        {/**<List>{secondaryListItems}</List> */}
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
@@ -185,10 +189,10 @@ export default function Dashboard() {
                 <Deposits />
               </Paper>
             </Grid>
-            {/* Recent Orders */}
+            {/* Recent Tickets */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Orders />
+                <Tickets />
               </Paper>
             </Grid>
           </Grid>
