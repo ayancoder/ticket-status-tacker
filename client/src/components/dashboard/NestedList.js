@@ -13,6 +13,7 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import CreateOutlinedIcon from "@material-ui/icons/CreateOutlined";
 import PersonAddOutlinedIcon from "@material-ui/icons/PersonAddOutlined";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import SendIcon from '@material-ui/icons/Send';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,7 +48,7 @@ export default function NestedList() {
       </ListItem>
       <ListItem button onClick={handleClick}>
         <ListItemIcon>
-          <InboxIcon />
+        <SendIcon/>
         </ListItemIcon>
         <ListItemText primary="Tickets" />
         {open ? <ExpandLess /> : <ExpandMore />}
