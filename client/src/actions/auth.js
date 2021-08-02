@@ -1,7 +1,7 @@
 import axios from "axios";
 import { setAlert } from "./alert";
 
-import { REGISTER_SUCCESS, REGISTER_FAIL } from "./types";
+import { REGISTER_SUCCESS, REGISTER_FAIL, LOGIN_SUCCESS } from "./types";
 
 export const register =(name, email, password) => async (dispatch) => {
     
@@ -42,4 +42,32 @@ export const register =(name, email, password) => async (dispatch) => {
         type: REGISTER_FAIL,
       });
     } 
+  };
+
+
+  export const login =(email,password) => async (dispatch) => {
+
+    try{
+  
+      const newUser = {
+        email,
+        password,
+      };
+  
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      
+      const body = JSON.stringify(newUser);
+      const res = await axios.post("/api/auth", body, config);
+      dispatch({
+        type: LOGIN_SUCCESS,
+        payload: res.data,
+      });
+  
+    }catch(err){
+      console.log('err->',err)
+    }
   };
