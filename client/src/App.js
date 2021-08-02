@@ -6,6 +6,7 @@ import  Alert from "./components/layout/Alert";
 import { Login } from "./components/auth/Login";
 import  Register  from "./components/auth/Register";
 import Dashboard from "./components/dashboard/Dashboard";
+import TicketsTable from "./components/ticket/TicketTable";
 
 // Redux
 import { Provider } from 'react-redux';
@@ -23,6 +24,7 @@ const App = () => (
             <Route exact path="/login" component={Login}></Route>
             <Route exact path="/register" component={Register}></Route>
             <Route exact path="/dashboard" component={Dashboard}></Route>
+            <Route exact path="/tickets" component={TicketsTable}></Route>
           </Switch>
         </section>
       </Fragment>

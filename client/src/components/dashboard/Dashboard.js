@@ -22,6 +22,7 @@ import { secondaryListItems } from "./listItems";
 import Chart from "./Chart";
 import Tickets from "./Ticket";
 import TicketCountCard from "./TicketsCountCard";
+import TicketsTable from "../ticket/TicketTable";
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -202,9 +203,7 @@ export default function Dashboard() {
             </Grid>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Tickets />
-              </Paper>
+               <TicketsTable/>
             </Grid>
           </Grid>
           <Box pt={4}>
