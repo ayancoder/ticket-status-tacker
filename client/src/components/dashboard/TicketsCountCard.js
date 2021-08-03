@@ -28,11 +28,16 @@ export default function TicketCountCard({ ticketType, color }) {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
+      
+      <div style= {{display:"flex"}}>
       <CardContent>
         <Typography variant="h2" component="h2" color={color}>
           32
         </Typography>
       </CardContent>
+      </div>
+
+      <div style= {{display:"flex"}}>
       <CardActions>
       <Button
         variant="contained"
@@ -41,8 +46,9 @@ export default function TicketCountCard({ ticketType, color }) {
        >
         {ticketType}
       </Button>
-
       </CardActions>
+      </div>
+
     </Card>
   );
 }
