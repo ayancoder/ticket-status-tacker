@@ -12,6 +12,8 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { login } from '../../actions/auth';
+import { connect} from 'react-redux';
 import axios from 'axios';
 
 
@@ -61,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const Login = () => {
+const Login = ({login}) => {
 
   const [formData, setFormData] = useState({
     email: "",
@@ -76,6 +78,7 @@ const Login = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     console.log(e);
+    login(email, password);
   };
    
   
@@ -154,4 +157,5 @@ const Login = () => {
     </Grid>
     );  
 }
-export default Login;
+
+export default connect(null, { login })(Login);
