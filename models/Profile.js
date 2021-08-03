@@ -20,6 +20,9 @@ const ProfileSchema = new mongoose.Schema({
   photo: {
     type: String,
   },
+  phone: {
+    type: String,
+  }
 });
 
 module.exports = mongoose.model('profile', ProfileSchema);
