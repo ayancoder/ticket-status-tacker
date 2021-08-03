@@ -13,6 +13,7 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 import "./App.css";
+import NewTicket from './components/ticket/NewTicket';
 
 const App = () => (
   <Provider store={store}>
@@ -25,6 +26,7 @@ const App = () => (
             <Route exact path="/register" component={Register}></Route>
             <Route exact path="/dashboard" component={Dashboard}></Route>
             <Route exact path="/tickets" component={TicketsTable}></Route>
+            <Route exact path="/newTicket" component={NewTicket}></Route>
           </Switch>
         </section>
       </Fragment>

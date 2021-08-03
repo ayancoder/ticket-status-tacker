@@ -23,6 +23,9 @@ import Chart from "./Chart";
 import Tickets from "./Ticket";
 import TicketCountCard from "./TicketsCountCard";
 import TicketsTable from "../ticket/TicketTable";
+import Navbar from './Navbar';
+
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -36,7 +39,6 @@ function Copyright() {
   );
 }
 
-const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,15 +51,8 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    padding: "0 8px",
+    padding: "0 12px",
     ...theme.mixins.toolbar,
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
   },
   menuButton: {
     marginRight: 36,
@@ -65,34 +60,12 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
-  drawerPaper: {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerPaperClose: {
-    overflowX: "hidden",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9),
-    },
-  },
-  appBarSpacer: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
     height: "100vh",
     overflow: "auto",
   },
   container: {
-    paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
   },
   paper: {
@@ -104,12 +77,15 @@ const useStyles = makeStyles((theme) => ({
   fixedHeight: {
     height: 240,
   },
+  divider:{
+     marginTop: theme.spacing(3),
+  }
 }));
+
 
 export default function Dashboard() {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
-  const [open, setOpen] = React.useState(true);
 
   React.useEffect(() => {
     const parsedIsClose = true;
@@ -120,15 +96,7 @@ export default function Dashboard() {
     localStorage.setItem("isclose", isclose);
   }, [isclose]);
 
-  const handleDrawerOpen = () => {
-    if (isclose === false) {
-      setIsClose(true);
-      setOpen(isclose);
-    } else {
-      setIsClose(false);
-      setOpen(isclose);
-    }
-  };
+ 
 
   // const handleDrawerClose = () => {
   //   setOpen(false);
@@ -138,74 +106,32 @@ export default function Dashboard() {
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open)}>
-        <Toolbar className={classes.toolbar}>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            className={clsx(
-              classes.menuButton,
-              open && classes.menuButtonHidden
-            )}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.title}
-          >
-            Dashboard
-          </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <Divider />
-        <NestedList />
-        <Divider />
-        {/**<List>{secondaryListItems}</List> */}
-      </Drawer>
+      <Navbar />
       <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             {/* ticket count card*/}
-            <Grid item  xs={4}>
-             <TicketCountCard ticketType="New Ticket" color="secondary"/>
-            </Grid> 
-            <Grid item  xs={4} >
-             <TicketCountCard ticketType="Open Ticket" color="primary" />
-            </Grid> 
-             <Grid item  xs={4} >
-             <TicketCountCard ticketType="Closed Ticket" color="default"/>
-             </Grid>
+            <Grid item xs={12} md={6} lg={4}>
+              <TicketCountCard ticketType="New Ticket" color="secondary" />
+            </Grid>
+            <Grid item xs={12} md={6} lg={4}>
+              <TicketCountCard ticketType="Open Ticket" color="primary" />
+            </Grid>
+            <Grid item xs={12} md={6} lg={4}>
+              <TicketCountCard ticketType="Closed Ticket" color="default" />
+            </Grid>
             {/* Chart */}
-            <Grid item xs={12}>
+            <Grid item xs={12} >
               <Paper className={fixedHeightPaper}>
                 <Chart />
               </Paper>
             </Grid>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-               <TicketsTable/>
+              <TicketsTable withLiknk={false}/>
             </Grid>
           </Grid>
+
           <Box pt={4}>
             <Copyright />
           </Box>

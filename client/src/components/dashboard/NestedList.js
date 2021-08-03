@@ -14,6 +14,7 @@ import CreateOutlinedIcon from "@material-ui/icons/CreateOutlined";
 import PersonAddOutlinedIcon from "@material-ui/icons/PersonAddOutlined";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SendIcon from '@material-ui/icons/Send';
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,11 +28,21 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function NestedList() {
+  const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
     setOpen(!open);
+  };
+  const createNewButtonHandler= (e) => {
+    history.push('/newTicket');
+    e.stopPropagation();
+  };
+
+  const dashboardButtonHandler= (e) => {
+    history.push('/dashboard');
+    e.stopPropagation();
   };
 
   return (
@@ -40,7 +51,7 @@ export default function NestedList() {
       aria-labelledby="nested-list-subheader"
       className={classes.root}
     >
-      <ListItem button>
+      <ListItem button onClick={dashboardButtonHandler}>
         <ListItemIcon>
           <DashboardIcon />
         </ListItemIcon>
@@ -55,8 +66,8 @@ export default function NestedList() {
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItem button className={classes.nested}>
-            <ListItemIcon>
+          <ListItem button className={classes.nested}  onClick={createNewButtonHandler}>
+            <ListItemIcon >
               <CreateOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary="Create New " />
