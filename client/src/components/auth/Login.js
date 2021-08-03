@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,7 +14,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { login } from '../../actions/auth';
 import { connect} from 'react-redux';
-import axios from 'axios';
+import PropTypes from 'prop-types';
 
 
 function Copyright() {
@@ -63,7 +63,9 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const Login = ({login}) => {
+const Login = ({login, isAuthenticated}) => {
+
+  const classes = useStyles();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -81,9 +83,10 @@ const Login = ({login}) => {
     login(email, password);
   };
    
-  
-    const classes = useStyles();
-  
+  if(isAuthenticated){
+    return <Redirect to="/dashboard"></Redirect>
+  }
+   
     return (
       <Grid container component="main" className={classes.root}>
       <CssBaseline />
@@ -158,4 +161,14 @@ const Login = ({login}) => {
     );  
 }
 
-export default connect(null, { login })(Login);
+
+Login.propTypes = {
+  login: PropTypes.func.isRequired,
+  isAuthenticated: PropTypes.bool,
+};
+
+const mapStateToProps = (state) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+});
+
+export default connect(mapStateToProps, { login })(Login);
