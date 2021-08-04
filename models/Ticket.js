@@ -14,6 +14,12 @@ const TicketSchema = new Schema({
     type: String,
     required: true,
   },
+
+  severity: {
+    type: String,
+    enum: ["CRITICAL", "MAJOR", "MINOR", "DUMPED"],
+    default: "MINOR",
+  },
   state: {
     type: String,
     enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED"],
