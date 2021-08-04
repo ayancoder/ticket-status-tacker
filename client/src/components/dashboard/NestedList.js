@@ -5,7 +5,6 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import StarBorder from "@material-ui/icons/StarBorder";
@@ -13,7 +12,7 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import CreateOutlinedIcon from "@material-ui/icons/CreateOutlined";
 import PersonAddOutlinedIcon from "@material-ui/icons/PersonAddOutlined";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import SendIcon from '@material-ui/icons/Send';
+import EmailIcon from '@material-ui/icons/Email';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,7 +47,7 @@ export default function NestedList() {
       </ListItem>
       <ListItem button onClick={handleClick}>
         <ListItemIcon>
-        <SendIcon/>
+        <EmailIcon/>
         </ListItemIcon>
         <ListItemText primary="Tickets" />
         {open ? <ExpandLess /> : <ExpandMore />}

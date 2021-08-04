@@ -18,9 +18,8 @@ import Link from "@material-ui/core/Link";
 import MenuIcon from "@material-ui/icons/Menu";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import NestedList from "./NestedList";
-import { secondaryListItems } from "./listItems";
+import { reportsListItems, userListItems } from "./listItems";
 import Chart from "./Chart";
-import Tickets from "./Ticket";
 import TicketCountCard from "./TicketsCountCard";
 import TicketsTable from "../ticket/TicketTable";
 function Copyright() {
@@ -179,7 +178,9 @@ export default function Dashboard() {
         <Divider />
         <NestedList />
         <Divider />
-        {/**<List>{secondaryListItems}</List> */}
+        <List>{reportsListItems}</List>
+        <Divider />
+        <List>{userListItems}</List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
