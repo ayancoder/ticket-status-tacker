@@ -28,11 +28,8 @@ export const loadUser = () => async dispatch => {
   }
 };
 
-export const register =(name, email, password) => async (dispatch) => {
-    
-  console.log("name", name);
-  console.log("email", email);
-  console.log("password", password);
+export const register =(name, email, password, phone) => async (dispatch) => {
+  
      try {
        
         const config = {
@@ -45,6 +42,7 @@ export const register =(name, email, password) => async (dispatch) => {
             name,
             email,
             password,
+            phone
           }; 
           const body = JSON.stringify(newUser);
           console.log("body", body)

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -7,14 +7,12 @@ const UserSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    reuired: true,
   },
   staffs: [
     {
-      user: {
-        type: Schema.Types.ObjectId
-      }
-    }
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
   ],
 });
-module.exports = Office = mongoose.model('office', UserSchema)
+module.exports = Office = mongoose.model("office", UserSchema);

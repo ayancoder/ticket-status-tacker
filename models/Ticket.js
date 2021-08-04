@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TicketSchema = new Schema({
-  user: {
+  owner: {
     type: Schema.Types.ObjectId,
+    ref: "user",
   },
-  heading: {
+  subject: {
     type: String,
     required: true,
   },
@@ -15,21 +16,17 @@ const TicketSchema = new Schema({
   },
   state: {
     type: String,
-    default: "New",
+    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED"],
+    default: "NEW",
   },
   filePath: {
     type: String,
   },
-  name: {
-    type: String,
-  },
-  avatar: {
-    type: String,
-  },
   comments: [
     {
-      user: {
+      owner: {
         type: Schema.Types.ObjectId,
+        ref: "user",
       },
       text: {
         type: String,
