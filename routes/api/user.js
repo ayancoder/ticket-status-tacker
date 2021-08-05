@@ -162,7 +162,7 @@ router.put(
        // if user executing. then use id as token's id
        userId = req.user.id;
     }
-    // Build profile object
+    // Build user object
     const userFields = {};
     userFields._id = userId;
     if(name) userFields.name = name;

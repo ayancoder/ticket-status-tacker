@@ -7,28 +7,27 @@ const checkObjectId = require("../../middleware/checkObjectId");
 const Ticket = require("../../models/Ticket");
 
 // @route    POST api/tickets
-// @desc     Create a ticket
+// @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
 // @access   Private
 router.post(
   "/",
   auth,
-  check("heading", "heading is required").notEmpty(),
-  check("description", "description is required").notEmpty(),
+  check("subject", "subject is required").notEmpty(),
+  check("source", "source is required").notEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
     try {
       const user = await User.findById(req.user.id).select("-password");
-
+      console.log('user -->', user);
       const newTicket = new Ticket({
-        heading: req.body.heading,
-        description: req.body.description,
-        name: user.name,
+        subject: req.body.subject,
+        source: req.body.source,
+        creator: req.user.id,
+        creatorName: user.name,
         avatar: user.avatar,
-        user: req.user.id,
       });
 
       const ticket = await newTicket.save();
@@ -41,13 +40,109 @@ router.post(
   }
 );
 
+// @route    POST api/tickets/assign/:ticket_id
+// @desc     update an existing ticket. subject/soruce/state/severity can be updated.
+// @access   Private
+
+router.put("/assign/:ticket_id",
+  checkObjectId("ticket_id"),
+  auth,
+  async (req, res) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const ticketId = req.params.ticket_id;
+    const {subject, source, state, severity} = req.body;
+    try {
+      // Build ticket object
+      const ticketFields = {};
+      if (subject) ticketFields.subject = subject;
+      if (source) ticketFields.source = source;
+      if (state) ticketFields.state = state;
+      if (severity) ticketFields.severity = severity;
+
+      console.log("ticket field", ticketFields);
+      //new option to true to return the document after update was applied.
+      let ticket = await Ticket.findOneAndUpdate(
+        { _id: ticketId },
+        { $set: ticketFields },
+        { new: true, setDefaultsOnInsert: true }
+      );
+      if (ticket) {
+        return res.json(ticket);
+      } else {
+        return res.status(400).json({ msg: "ticket not found" });
+      }
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+    }
+  }
+);
+
+// @route    POST api/tickets/assign/:ticket_id/:user_id
+// @desc     assign a ticket to user and give severity.
+// @access   Private
+
+router.put(
+  "/assign/:ticket_id/:assignee_id",
+  checkObjectId("ticket_id"),
+  checkObjectId("assignee_id"),
+  auth,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const ticketId = req.params.ticket_id;
+    const assigneeId = req.params.assignee_id;
+    try {
+      const user = await User.findById(assigneeId).select("-password");
+      console.log("user -->", user);
+      const { severity } = req.body.severity;
+      // Build ticket object
+      const ticketFields = {};
+      ticketFields._id = ticketId;
+      ticketFields.assignedTo = user._id;
+      ticketFields.assignedToName = user.name;
+      ticketFields.severity = severity;
+
+      console.log("ticket field", ticketFields);
+      //new option to true to return the document after update was applied.
+      let ticket = await Ticket.findOneAndUpdate(
+        { _id: ticketId },
+        { $set: ticketFields },
+        { new: true, setDefaultsOnInsert: true }
+      );
+      if (ticket) {
+        return res.json(ticket);
+      } else {
+        return res.status(400).json({ msg: "ticket not found" });
+      }
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+    }
+  }
+);
+
 // @route    GET api/tickets
-// @desc     Get all tickets
+// @desc     Get all tickets assigned/in-progress/resolved
 // @access   Private
 router.get("/", auth, async (req, res) => {
+  const page = parseInt(req.query.page)
+  const limit = parseInt(req.query.limit)
+  
   try {
+    if(req.user.role === 'ADMIN'){
     const tickets = await Ticket.find().sort({ date: -1 });
     res.json(tickets);
+
+    }else {
+      return res.status(400).json({ msg: "only admin can view all users." })
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
