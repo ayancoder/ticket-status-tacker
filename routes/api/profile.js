@@ -5,10 +5,7 @@ const { check, validationResult } = require('express-validator');
 // bring in normalize to give us a proper url, regardless of what user entered
 const normalize = require('normalize-url');
 const checkObjectId = require('../../middleware/checkObjectId');
-
-const Profile = require("../../models/Profile");
 const User = require("../../models/User");
-const Ticket = require("../../models/Ticket");
 
 // @route    GET api/profile/me
 // @desc     Get current users profile
@@ -37,12 +34,14 @@ router.post(
   "/",
   auth,
   check("name", "name is required").notEmpty(),
-  check("office", "Office is required").notEmpty(),
+  check("email", "Office is required").notEmpty(),
+  check("password", "Office is required").notEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    console.log('req', req);
 
     // destructure the request
     const { name, address, office } = req.body;
@@ -50,12 +49,13 @@ router.post(
     const profileFields = {};
     profileFields.user = req.user.id;
     if(name) profileFields.name = name;
+    if(email) profileFields.name = email;
     if(address) profileFields.address = address;
     if(office) profileFields.office = office;
     console.log(profileFields);
     try {
       // Using upsert option (creates new doc if no match is found):
-      let profile = await Profile.findOneAndUpdate(
+      let profile = await User.findOneAndUpdate(
         { user: req.user.id },
         { $set: profileFields },
         { new: true, upsert: true, setDefaultsOnInsert: true }

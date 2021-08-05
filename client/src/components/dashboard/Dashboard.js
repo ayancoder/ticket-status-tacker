@@ -18,9 +18,8 @@ import Link from "@material-ui/core/Link";
 import MenuIcon from "@material-ui/icons/Menu";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import NestedList from "./NestedList";
-import { secondaryListItems } from "./listItems";
+import { reportsListItems, userListItems } from "./listItems";
 import Chart from "./Chart";
-import Tickets from "./Ticket";
 import TicketCountCard from "./TicketsCountCard";
 import TicketsTable from "../ticket/TicketTable";
 import Navbar from './Navbar';
@@ -106,7 +105,9 @@ export default function Dashboard() {
 
   return (
     <div className={classes.root}>
+
       <Navbar />
+
       <main className={classes.content}>
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>

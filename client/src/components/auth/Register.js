@@ -10,7 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { setAlert } from "../../actions/alert";
 import { register } from "../../actions/auth";
@@ -48,24 +48,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Register = ({ setAlert, register }) => {
+const Register = ({ setAlert, register, isAuthenticated }) => {
+  
+  const classes = useStyles();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    mobile:""
   });
-  const { name, email, password } = formData;
+  const { name, email, password,phone} = formData;
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    register(name, email, password);
+    register(name, email, password,phone);
   };
 
-  const classes = useStyles();
 
+  if(isAuthenticated){
+    return <Redirect to="/dashboard"></Redirect>
+  }
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -104,6 +110,20 @@ const Register = ({ setAlert, register }) => {
                 name="email"
                 autoComplete="email"
                 value={email}
+                onChange={(e) => onChange(e)}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                name="phone"
+                label="phone"
+                type="phone"
+                id="phone"
+                value={phone}
                 onChange={(e) => onChange(e)}
                 required
               />
@@ -152,4 +172,8 @@ Register.propTypes = {
   register: PropTypes.func.isRequired,
 };
 
-export default connect(null, { setAlert, register })(Register);
+const mapStateToProps = (state) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+});
+
+export default connect(mapStateToProps, { setAlert, register })(Register);
