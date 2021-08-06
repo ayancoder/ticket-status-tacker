@@ -14,7 +14,7 @@ import PersonAddOutlinedIcon from "@material-ui/icons/PersonAddOutlined";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SendIcon from '@material-ui/icons/Send';
 import { useHistory } from "react-router-dom";
-
+import EmailIcon from '@material-ui/icons/Email';
 
 
 const useStyles = makeStyles((theme) => ({
