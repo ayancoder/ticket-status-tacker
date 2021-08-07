@@ -170,18 +170,23 @@ router.get("/", auth, async (req, res) => {
 });
 
 
-// @route    GET api/tickets
-// @desc     Get all tickets assigned/in-progress/resolved
+// @route    GET api/tickets/search
+// @desc     Get all tickets 
 // @access   Private
 router.get("/search", auth, async (req, res) => {
   const page = parseInt(req.query.page)
   const limit = parseInt(req.query.limit)
   
-  const assignedToName = req.query.assignedToName;
-  const subject = req.query.subject;
-  const state = req.query.state;
-  const startDate = req.query.startDate;
-  const endDate = req.query.endDate;
+  
+  const subject = req.body.subject;
+  
+  const assignedToName = req.body.assignedToName;
+  const state = req.body.state;
+  const priority = req.body.priority
+
+  const startDate = req.body.startDate;
+  const endDate = req.body.endDate;
+
   let query={};
     if(assignedToName){
         query.assignedToName={ $regex: new RegExp(assignedToName), $options: "i" }
