@@ -7,7 +7,7 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
 import TicketsTable from "./TicketTable";
-import Navbar from '../dashboard/Navbar';
+import Navbar from "../dashboard/Navbar";
 import { Button, TextField } from "@material-ui/core";
 
 function Copyright() {
@@ -130,7 +130,7 @@ const useStyles = makeStyles((theme) => ({
   },
   descrptioncontainer: {
     marginTop: theme.spacing(3),
-    flexDirection:'row'
+    flexDirection: "row",
   },
   formTypoDesc: {
     color: theme.palette.primary.main,
@@ -142,12 +142,11 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: "1rem",
     paddingRight: "1rem",
   },
-  submitcontainer:{
+  submitcontainer: {
     marginTop: theme.spacing(3),
     // marginLeft:theme.spacing(13)
-  }
+  },
 }));
-
 
 function NewTicket() {
   const classes = useStyles();
@@ -156,6 +155,7 @@ function NewTicket() {
   const [subject, setSubject] = React.useState(null);
   const [source, setSource] = React.useState(null);
   const [desc, setDesc] = React.useState(null);
+  const [fileName, setFileName] = React.useState(null);
 
   React.useEffect(() => {
     const parsedIsClose = true;
@@ -166,30 +166,29 @@ function NewTicket() {
     localStorage.setItem("isclose", isclose);
   }, [isclose]);
 
-  const onFileChange=e=>{    
-    setSelectedFile(e.target.files[0])
-  } 
+  const onFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+    setFileName(e.target.files[0].name);
+  };
 
-  const onSubjectChange=e=>{
-    setSubject(e.target.value)
-  }
+  const onSubjectChange = (e) => {
+    setSubject(e.target.value);
+  };
 
-  const onSourceChange=e=>{
-    setSource(e.target.value)
-  }
+  const onSourceChange = (e) => {
+    setSource(e.target.value);
+  };
 
-  const onDescChange=e=>{
-    setDesc(e.target.value)
-  }
+  const onDescChange = (e) => {
+    setDesc(e.target.value);
+  };
 
-  const onSubmit=event=>{
-    console.log(selectedFile)
-    console.log(subject)
-    console.log(source)
-    console.log(desc)
-  }
-
-
+  const onSubmit = (event) => {
+    console.log(selectedFile);
+    console.log(subject);
+    console.log(source);
+    console.log(desc);
+  };
 
   return (
     <div className={classes.root}>
@@ -222,11 +221,12 @@ function NewTicket() {
                           <b>Subject </b>
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={6} lg={4}>
+                      <Grid item xs={12} md={6} lg={6}>
                         <TextField
                           id="standard-textarea"
                           multiline
-                          variant="outlined"
+                          style={{ textAlign: "left", width: "20rem" }}
+                          // variant="outlined"
                           onChange={onSubjectChange}
                         />
                       </Grid>
@@ -237,11 +237,12 @@ function NewTicket() {
                           <b>Source </b>
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={6} lg={4}>
+                      <Grid item xs={12} md={6} lg={6}>
                         <TextField
                           id="standard-textarea"
                           multiline
-                          variant="outlined"
+                          style={{ textAlign: "left", width: "20rem" }}
+                          // variant="outlined"
                           onChange={onSourceChange}
                         />
                       </Grid>
@@ -252,26 +253,46 @@ function NewTicket() {
                           variant="h6"
                           className={classes.formTypoDesc}
                         >
-                          <b>Description </b>
+                          <b> Description </b>
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={6} lg={4}>
+                      <Grid item xs={12} md={6} lg={6}>
                         <TextField
                           id="standard-textarea"
                           multiline
-                          variant="outlined"
+                          style={{ width: "25rem" }}
                           onChange={onDescChange}
                         />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.descrptioncontainer}>
-                      <Grid item xs={12} md={6} lg={4}>
-                        <input type="file" onChange={onFileChange} />
+                      <Grid item xs={12} md={6} lg={12}>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          component="label"
+                        >
+                          Upload
+                          <input
+                            type="file"
+                            style={{ display: "none" }}
+                            onChange={onFileChange}
+                          />
+                        </Button>
+                        &nbsp;&nbsp;
+                        {fileName === null ? "Select File" : fileName}
                       </Grid>
                     </Grid>
                     <Grid container className={classes.submitcontainer}>
-                      <Grid item xs={12} md={6} lg={4} >
-                        <Button  variant="outlined" color="primary" onClick={onSubmit}>Submit</Button>
+                      <Grid item xs={12} md={6} lg={12}>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          onClick={onSubmit}
+                          style={{ marginRight: "4rem" }}
+                        >
+                          Submit
+                        </Button>
                       </Grid>
                     </Grid>
                   </Container>
@@ -280,7 +301,7 @@ function NewTicket() {
             </form>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-              <TicketsTable withLiknk={true}/>
+              <TicketsTable withLink="false" />
             </Grid>
           </Grid>
 
@@ -293,4 +314,4 @@ function NewTicket() {
   );
 }
 
-export default NewTicket
+export default NewTicket;

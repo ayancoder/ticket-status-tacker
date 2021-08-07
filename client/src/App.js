@@ -6,7 +6,7 @@ import Alert from "./components/layout/Alert";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Dashboard from "./components/dashboard/Dashboard";
-import TicketsTable from "./components/ticket/TicketTable";
+import NewTicketDisplay from "./components/ticket/NewTicketDisplay";
 import { loadUser } from "./actions/auth";
 import setAuthToken from "./utils/setAuthToken";
 import PrivateRoute from "./components/routing/PrivateRoute";
@@ -15,7 +15,7 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 import "./App.css";
-import NewTicket from './components/ticket/NewTicket';
+import NewTicket from "./components/ticket/NewTicket";
 
 if (localStorage.token) {
   setAuthToken(localStorage.token);
@@ -35,8 +35,12 @@ const App = () => {
             <Switch>
               <Route exact path="/login" component={Login}></Route>
               <Route exact path="/register" component={Register}></Route>
-              <PrivateRoute exact path="/dashboard" component={Dashboard}></PrivateRoute>
-              <Route exact path="/tickets" component={TicketsTable}></Route>
+              <PrivateRoute
+                exact
+                path="/dashboard"
+                component={Dashboard}
+              ></PrivateRoute>
+              <Route exact path="/tickets" component={NewTicketDisplay}></Route>
               <Route exact path="/newTicket" component={NewTicket}></Route>
             </Switch>
           </section>
