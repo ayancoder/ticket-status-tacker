@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 const mongoosePaginate = require("mongoose-paginate-v2");
+const Schema = mongoose.Schema;
 
 const TicketSchema = new Schema({
   creator: {
@@ -27,18 +27,23 @@ const TicketSchema = new Schema({
   source: {
     type: String
   },
-  severity: {
-    type: String,
-    enum: ["CRITICAL", "MAJOR", "MINOR", "DUMPED"],
-    default: "MINOR",
+  priority: {
+    type: Number,
   },
   state: {
     type: String,
-    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED"],
+    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED", "DUMPPED"],
     default: "NEW",
   },
   filePath: {
     type: String,
+  },
+  createDate: {
+    type: Date,
+    default: Date.now,
+  },
+  assignDate: {
+    type: Date,
   },
   comments: [
     {
@@ -64,11 +69,7 @@ const TicketSchema = new Schema({
         default: Date.now,
       },
     },
-  ],
-  date: {
-    type: Date,
-    default: Date.now,
-  },
+  ]
 });
 
 TicketSchema.plugin(mongoosePaginate);
