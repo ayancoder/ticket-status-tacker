@@ -1,6 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
+const multer = require("multer");
+
+const fileFilter = (req, file, callback) => {
+  if(file.mimetype === 'image/jpeg' | 
+    file.mimetype === 'image/png'){
+      callback(null, true);
+    }else{ 
+      callback(new Error("invalid file extension"), false);
+    }
+  
+}
+const storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, "./uploads");
+  },
+  filename: function (req, file, callback) {
+    callback(null, new Date().toISOString() + file.originalname);
+  },
+});
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5,
+  },
+  fileFilter: fileFilter,
+});
+
 const auth = require("../../middleware/auth");
 const User = require("../../models/User");
 const checkObjectId = require("../../middleware/checkObjectId");
@@ -12,10 +39,13 @@ const Ticket = require("../../models/Ticket");
 router.post(
   "/user/:user_id",
   auth,
+  upload.single('ticketImage'),
   checkObjectId("user_id"),
   check("subject", "subject is required").notEmpty(),
-  check("source", "source is required").notEmpty(),
+  check("source", "source is required").notEmpty(), 
   async (req, res) => {
+
+    console.log(req.file);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -29,6 +59,7 @@ router.post(
         creator: req.user.id,
         creatorName: user.name,
         avatar: user.avatar,
+        filePath: req.file.path
       });
 
       const ticket = await newTicket.save();
