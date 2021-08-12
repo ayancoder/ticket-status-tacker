@@ -33,6 +33,7 @@ const User = require("../../models/User");
 const checkObjectId = require("../../middleware/checkObjectId");
 const Ticket = require("../../models/Ticket");
 
+
 // @route    POST api/tickets
 // @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
 // @access   Private
@@ -64,7 +65,7 @@ router.post(
 
       const ticket = await newTicket.save();
 
-      res.json(ticket);
+     return  res.json(ticket);
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
@@ -132,7 +133,6 @@ router.put(
     const assigneeId = req.params.assignee_id;
     try {
       const user = await User.findById(assigneeId).select("-password -tickets -office");
-      console.log("req body -->", req.body);
       const { priority } = req.body;
       // Build ticket object
       const ticketFields = {};
@@ -185,9 +185,9 @@ router.get("/", auth, async (req, res) => {
   //const tickets = await Ticket.find(query).sort({ date: -1 });
   //res.send(tickets);
   //console.log('tickets', tickets);
-  Ticket.paginate(query, options)
+  await Ticket.paginate(query, options)
     .then((data) => {
-      res.send({
+     return res.status(200).send({
         total: data.totalDocs,
         tickets: data.docs,
         totalPages: data.totalPages,
@@ -243,8 +243,8 @@ router.get("/search", auth, async (req, res) => {
     };
 
     //const tickets = await Ticket.find().sort({ date: -1 });
-    Ticket.paginate(query, options).then((data) => {
-      res.send({
+     await Ticket.paginate(query, options).then((data) => {
+     return res.status(200).send({
         totalItems: data.totalDocs,
         articles: data.docs,
         totalPages: data.totalPages,
@@ -265,25 +265,205 @@ router.get("/search", auth, async (req, res) => {
   }
 });
 
+
 // @route    GET api/tickets/:id
 // @desc     Get ticket by ID
 // @access   Private
-router.get("/:id", auth, checkObjectId("id"), async (req, res) => {
+router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id);
+    const ticket = await Ticket.findById(req.params.ticket_id);
 
     if (!ticket) {
       return res.status(404).json({ msg: "Ticket not found" });
     }
-
-    res.json(ticket);
+    return res.json(ticket);
   } catch (err) {
     console.error(err.message);
-
-    res.status(500).send("Server Error");
+    return res.status(500).send("Server Error");
   }
 });
 
+
+router.get("/count", auth, (req, res) => {
+  try {
+    const state = req.query.state;
+    console.log("state", state);
+
+    // Build query object
+    console.log("reached count api");
+    if (!state) {
+      // get count of new/assigned/in-progress/resolved/closed
+
+      Ticket.aggregate(
+        [
+          {
+            $facet: {
+              newTicket: [
+                {
+                  $match: {
+                    state: "NEW",
+                  },
+                },
+                {
+                  $count: "newTicket",
+                },
+              ],
+              assignedTicket: [
+                {
+                  $match: {
+                    state: "ASSIGNED",
+                  },
+                },
+                {
+                  $count: "assignedTicket",
+                },
+              ],
+              inprogressTicket: [
+                {
+                  $match: {
+                    state: "IN-PROGRESS",
+                  },
+                },
+                {
+                  $count: "inprogressTicket",
+                },
+              ],
+              resolvedTicket: [
+                {
+                  $match: {
+                    state: "RESOLVED",
+                  },
+                },
+                {
+                  $count: "resolvedTicket",
+                },
+              ],
+            },
+          },
+          {
+            $project: {
+              newTicket: {
+                $arrayElemAt: ["$newTicket.newTicket", 0],
+              },
+              assignedTicket: {
+                $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
+              },
+              inprogressTicket: {
+                $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
+              },
+              resolvedTicket: {
+                $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+              },
+            },
+          },
+        ],
+        function (err, counts) {
+          if (err) {
+            console.error(err.message);
+            return res.status(500).send("Server Error");
+          }
+          console.log(" --> ", counts[0]);
+          return res.status(200).send(counts[0]);
+        }
+      );
+    } else {
+      const state  = req.query.state;
+      console.log("state is ", state);
+      Ticket.aggregate(
+        [
+          {
+            "$facet": {
+              "high": [
+                {
+                  "$match": {
+                    "$and": [
+                      {
+                        state: state
+                      },
+                      {
+                        priority: 1
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$count": "high"
+                }
+              ],
+              "med": [
+                {
+                  "$match": {
+                    "$and": [
+                      {
+                        state: state
+                      },
+                      {
+                        priority: 2
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$count": "med"
+                }
+              ],
+              "low": [
+                {
+                  "$match": {
+                    "$and": [
+                      {
+                        state: state
+                      },
+                      {
+                        priority: 3
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$count": "low"
+                }
+              ]
+            }
+          },
+          {
+            "$project": {
+              "high": {
+                "$arrayElemAt": [
+                  "$high.high",
+                  0
+                ]
+              },
+              "med": {
+                "$arrayElemAt": [
+                  "$med.med",
+                  0
+                ]
+              },
+              "low": {
+                "$arrayElemAt": [
+                  "$low.low",
+                  0
+                ]
+              }
+            }
+          }
+        ],
+        function (err, counts) {
+          if (err) {
+            console.error(err.message);
+            return res.status(500).send("Server Error");
+          }
+          console.log(" --> ", counts[0]);
+          return res.status(200).send(counts[0]);
+        }
+      );
+    }
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
 // @route    DELETE api/tickets/:id
 // @desc     Delete a ticket
 // @access   Private
@@ -379,5 +559,6 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
     return res.status(500).send("Server Error");
   }
 });
+
 
 module.exports = router;
