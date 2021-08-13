@@ -1,77 +1,48 @@
 const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
-const multer = require("multer");
-
-const fileFilter = (req, file, callback) => {
-  if(file.mimetype === 'image/jpeg' | 
-    file.mimetype === 'image/png'){
-      callback(null, true);
-    }else{ 
-      callback(new Error("invalid file extension"), false);
-    }
-  
-}
-const storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "./uploads");
-  },
-  filename: function (req, file, callback) {
-    callback(null, new Date().toISOString() + file.originalname);
-  },
-});
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 5,
-  },
-  fileFilter: fileFilter,
-});
-
 const auth = require("../../middleware/auth");
 const User = require("../../models/User");
 const checkObjectId = require("../../middleware/checkObjectId");
 const Ticket = require("../../models/Ticket");
 
-
 // @route    POST api/tickets
 // @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
 // @access   Private
-router.post(
-  "/user/:user_id",
-  auth,
-  upload.single('ticketImage'),
-  checkObjectId("user_id"),
-  check("subject", "subject is required").notEmpty(),
-  check("source", "source is required").notEmpty(), 
-  async (req, res) => {
+ router.post(
+   "/",
+   auth,
+   check("subject", "subject is required").notEmpty(),
+   check("source", "source is required").notEmpty(),
+   async (req, res) => {
+     const errors = validationResult(req);
+     if (!errors.isEmpty()) {
+       return res.status(400).json({ errors: errors.array() });
+     }
+     try {
+       console.log("req.user", req.user);
+       const user = await User.findById(req.user.id).select(
+         "-password -tickets -office"
+       );
+       console.log("user -->", user);
+       const newTicket = new Ticket({
+         subject: req.body.subject,
+         source: req.body.source,
+         creator: req.user.id,
+         creatorName: user.name,
+         avatar: user.avatar,
+         filePath: req.body.imagePath,
+       });
 
-    console.log(req.file);
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    try {
-      const user = await User.findById(req.params.user_id).select("-password -tickets -office");
-      console.log('user -->', user);
-      const newTicket = new Ticket({
-        subject: req.body.subject,
-        source: req.body.source,
-        creator: req.user.id,
-        creatorName: user.name,
-        avatar: user.avatar,
-        filePath: req.file.path
-      });
+       const ticket = await newTicket.save();
 
-      const ticket = await newTicket.save();
-
-     return  res.json(ticket);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server Error");
-    }
-  }
-);
+       return res.json(ticket);
+     } catch (err) {
+       console.error(err.message);
+       res.status(500).send("Server Error");
+     }
+   }
+ );
 
 // @route    PUT api/tickets/:ticket_id
 // @desc     update an existing ticket. subject/soruce/state/priority can be updated.

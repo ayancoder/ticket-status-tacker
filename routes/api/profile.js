@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const multer = require("multer");
 const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 // bring in normalize to give us a proper url, regardless of what user entered
 const normalize = require('normalize-url');
 const checkObjectId = require('../../middleware/checkObjectId');
 const User = require("../../models/User");
+
 
 // @route    GET api/profile/me
 // @desc     Get current users profile
