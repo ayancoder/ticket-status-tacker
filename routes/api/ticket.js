@@ -9,40 +9,40 @@ const Ticket = require("../../models/Ticket");
 // @route    POST api/tickets
 // @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
 // @access   Private
- router.post(
-   "/",
-   auth,
-   check("subject", "subject is required").notEmpty(),
-   check("source", "source is required").notEmpty(),
-   async (req, res) => {
-     const errors = validationResult(req);
-     if (!errors.isEmpty()) {
-       return res.status(400).json({ errors: errors.array() });
-     }
-     try {
-       console.log("req.user", req.user);
-       const user = await User.findById(req.user.id).select(
-         "-password -tickets -office"
-       );
-       console.log("user -->", user);
-       const newTicket = new Ticket({
-         subject: req.body.subject,
-         source: req.body.source,
-         creator: req.user.id,
-         creatorName: user.name,
-         avatar: user.avatar,
-         filePath: req.body.imagePath,
-       });
+router.post(
+  "/",
+  auth,
+  check("subject", "subject is required").notEmpty(),
+  check("source", "source is required").notEmpty(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      console.log("req.user", req.user);
+      const user = await User.findById(req.user.id).select(
+        "-password -tickets -office"
+      );
+      console.log("user -->", user);
+      const newTicket = new Ticket({
+        subject: req.body.subject,
+        source: req.body.source,
+        creator: req.user.id,
+        creatorName: user.name,
+        avatar: user.avatar,
+        filePath: req.body.imagePath,
+      });
 
-       const ticket = await newTicket.save();
+      const ticket = await newTicket.save();
 
-       return res.json(ticket);
-     } catch (err) {
-       console.error(err.message);
-       res.status(500).send("Server Error");
-     }
-   }
- );
+      return res.json(ticket);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+    }
+  }
+);
 
 // @route    PUT api/tickets/:ticket_id
 // @desc     update an existing ticket. subject/soruce/state/priority can be updated.
@@ -66,7 +66,7 @@ router.put(
       if (source) ticketFields.source = source;
       if (state) ticketFields.state = state;
       if (priority) ticketFields.priority = priority;
-      
+
       console.log("ticket field", ticketFields);
       //new option to true to return the document after update was applied.
       let ticket = await Ticket.findOneAndUpdate(
@@ -103,7 +103,9 @@ router.put(
     const ticketId = req.params.ticket_id;
     const assigneeId = req.params.assignee_id;
     try {
-      const user = await User.findById(assigneeId).select("-password -tickets -office");
+      const user = await User.findById(assigneeId).select(
+        "-password -tickets -office"
+      );
       const { priority } = req.body;
       // Build ticket object
       const ticketFields = {};
@@ -111,7 +113,7 @@ router.put(
       ticketFields.assignedTo = user._id;
       ticketFields.assignedToName = user.name;
       ticketFields.priority = priority;
-      ticketFields.state = 'ASSIGNED';
+      ticketFields.state = "ASSIGNED";
       ticketFields.assignDate = Date.now();
       console.log("ticket field", ticketFields);
       //new option to true to return the document after update was applied.
@@ -146,19 +148,20 @@ router.get("/", auth, async (req, res) => {
   if (priority) query.priority = priority;
   console.log("query-->", query);
 
-   const options = {
+  const options = {
     page: req.query.page,
     limit: req.query.limit,
-    select: '_id subject source creatorName createDate assignedToName assignDate state priority',
-    sort: { priority: 1, assignDate: 1}
-  }; 
+    select:
+      "_id subject source creatorName createDate assignedToName assignDate state priority",
+    sort: { priority: 1, assignDate: 1 },
+  };
 
   //const tickets = await Ticket.find(query).sort({ date: -1 });
   //res.send(tickets);
   //console.log('tickets', tickets);
   await Ticket.paginate(query, options)
     .then((data) => {
-     return res.status(200).send({
+      return res.status(200).send({
         total: data.totalDocs,
         tickets: data.docs,
         totalPages: data.totalPages,
@@ -171,71 +174,63 @@ router.get("/", auth, async (req, res) => {
     });
 });
 
-
 // @route    GET api/tickets/search
-// @desc     Get all tickets 
+// @desc     Get all tickets
 // @access   Private
 router.get("/search", auth, async (req, res) => {
-  const page = parseInt(req.query.page)
-  const limit = parseInt(req.query.limit)
-  
-  
-  const subject = req.body.subject;
-  
-  const assignedToName = req.body.assignedToName;
-  const state = req.body.state;
-  const priority = req.body.priority
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
 
-  const startDate = req.body.startDate;
-  const endDate = req.body.endDate;
+  const subject = req.query.subject;
 
-  let query={};
-    if(assignedToName){
-        query.assignedToName={ $regex: new RegExp(assignedToName), $options: "i" }
-    }
-    if(subject){
-        query.subject={ $regex: new RegExp(subject), $options: "i" }
-    }
-    if(state){
-      query.state={ $regex: new RegExp(state), $options: "i" }
+  const assignedToName = req.query.assignedToName;
+  const state = req.query.state;
+  const priority = req.query.priority;
+
+  const startDate = req.query.startDate;
+  const endDate = req.query.endDate;
+
+  let query = {};
+  if (assignedToName) {
+    query.assignedToName = {
+      $regex: new RegExp(assignedToName),
+      $options: "i",
+    };
   }
-  try {
-    //if(req.user.role === 'ADMIN'){
-      const options = {
-        page: page,
-        limit: limit,
-        collation: {
-          locale: 'en',
-        },
-      };
+  if (subject) {
+    query.subject = { $regex: new RegExp(subject), $options: "i" };
+  }
+  if (state) query.state = state;
+  if (priority) query.priority = priority;
+  if (startDate) query.createDate = { $gte: startDate, $lte: endDate };
+  console.log("search query-->", query);
 
-    const query = {
-      severity : 'CRITICAL'
+  try {
+    const options = {
+      page: page,
+      limit: limit,
+      collation: {
+        locale: "en",
+      },
     };
 
-    //const tickets = await Ticket.find().sort({ date: -1 });
-     await Ticket.paginate(query, options).then((data) => {
-     return res.status(200).send({
-        totalItems: data.totalDocs,
-        articles: data.docs,
-        totalPages: data.totalPages,
-        currentPage: data.page,
+    await Ticket.paginate(query, options)
+      .then((data) => {
+        return res.status(200).send({
+          totalItems: data.totalDocs,
+          articles: data.docs,
+          totalPages: data.totalPages,
+          currentPage: data.page,
+        });
+      })
+      .catch((err) => {
+        console.log("error in fetching data");
       });
-   })
-   .catch((err) => {
-      console.log('error in fetching data')
-   });
-    //res.json(tickets);
-
-  /*   }else {
-      return res.status(400).json({ msg: "only admin can view all users." })
-    } */
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 });
-
 
 // @route    GET api/tickets/:id
 // @desc     Get ticket by ID
@@ -253,7 +248,6 @@ router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
     return res.status(500).send("Server Error");
   }
 });
-
 
 router.get("/count", auth, (req, res) => {
   try {
@@ -338,87 +332,78 @@ router.get("/count", auth, (req, res) => {
         }
       );
     } else {
-      const state  = req.query.state;
+      const state = req.query.state;
       console.log("state is ", state);
       Ticket.aggregate(
         [
           {
-            "$facet": {
-              "high": [
+            $facet: {
+              high: [
                 {
-                  "$match": {
-                    "$and": [
+                  $match: {
+                    $and: [
                       {
-                        state: state
+                        state: state,
                       },
                       {
-                        priority: 1
-                      }
-                    ]
-                  }
+                        priority: 1,
+                      },
+                    ],
+                  },
                 },
                 {
-                  "$count": "high"
-                }
+                  $count: "high",
+                },
               ],
-              "med": [
+              med: [
                 {
-                  "$match": {
-                    "$and": [
+                  $match: {
+                    $and: [
                       {
-                        state: state
+                        state: state,
                       },
                       {
-                        priority: 2
-                      }
-                    ]
-                  }
+                        priority: 2,
+                      },
+                    ],
+                  },
                 },
                 {
-                  "$count": "med"
-                }
+                  $count: "med",
+                },
               ],
-              "low": [
+              low: [
                 {
-                  "$match": {
-                    "$and": [
+                  $match: {
+                    $and: [
                       {
-                        state: state
+                        state: state,
                       },
                       {
-                        priority: 3
-                      }
-                    ]
-                  }
+                        priority: 3,
+                      },
+                    ],
+                  },
                 },
                 {
-                  "$count": "low"
-                }
-              ]
-            }
+                  $count: "low",
+                },
+              ],
+            },
           },
           {
-            "$project": {
-              "high": {
-                "$arrayElemAt": [
-                  "$high.high",
-                  0
-                ]
+            $project: {
+              high: {
+                $arrayElemAt: ["$high.high", 0],
               },
-              "med": {
-                "$arrayElemAt": [
-                  "$med.med",
-                  0
-                ]
+              med: {
+                $arrayElemAt: ["$med.med", 0],
               },
-              "low": {
-                "$arrayElemAt": [
-                  "$low.low",
-                  0
-                ]
-              }
-            }
-          }
+              low: {
+                $arrayElemAt: ["$low.low", 0],
+              },
+            },
+          },
         ],
         function (err, counts) {
           if (err) {
@@ -530,6 +515,5 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
     return res.status(500).send("Server Error");
   }
 });
-
 
 module.exports = router;
