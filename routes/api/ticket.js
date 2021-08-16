@@ -90,10 +90,9 @@ router.put(
 // @desc     assign a ticket to user and give priority(passed in body).
 // @access   Private
 
-router.put(
-  "/assign/:ticket_id/:assignee_id",
+  router.put(
+  "/assign/:ticket_id",
   checkObjectId("ticket_id"),
-  checkObjectId("assignee_id"),
   auth,
   async (req, res) => {
     const errors = validationResult(req);
@@ -101,20 +100,33 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
     const ticketId = req.params.ticket_id;
-    const assigneeId = req.params.assignee_id;
     try {
-      const user = await User.findById(assigneeId).select(
+      const { assigneeId, priority, commentText } = req.body;
+      const assignedUser = await User.findById(assigneeId).select(
         "-password -tickets -office"
       );
-      const { priority } = req.body;
+      
+      const commentUser = await User.findById(req.user.id).select(
+        "-password -tickets -office"
+      );
+
       // Build ticket object
       const ticketFields = {};
       ticketFields._id = ticketId;
-      ticketFields.assignedTo = user._id;
-      ticketFields.assignedToName = user.name;
+      ticketFields.assignedTo = assignedUser._id;
+      ticketFields.assignedToName = assignedUser.name;
       ticketFields.priority = priority;
       ticketFields.state = "ASSIGNED";
       ticketFields.assignDate = Date.now();
+  
+      const newComment = {
+        text: commentText,
+        name: commentUser.name,
+        avatar: commentUser.avatar,
+        user: commentUser.id,
+      };
+
+      ticketFields.comments = newComment
       console.log("ticket field", ticketFields);
       //new option to true to return the document after update was applied.
       let ticket = await Ticket.findOneAndUpdate(
