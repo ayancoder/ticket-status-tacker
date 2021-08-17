@@ -465,7 +465,6 @@ router.post(
   "/comment/:id",
   auth,
   checkObjectId("id"),
-  check("text", "Text is required").notEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -475,19 +474,23 @@ router.post(
     try {
       const user = await User.findById(req.user.id).select("-password");
       const ticket = await Ticket.findById(req.params.id);
-
+     
       const newComment = {
-        text: req.body.text,
+        text: req.body.commentText,
         name: user.name,
         avatar: user.avatar,
         user: req.user.id,
       };
+      const state =req.body.state;
+      const priority = req.body.priority
+      if(state) ticket.state = state;
+      if(priority) ticket.priority = priority;
 
       ticket.comments.unshift(newComment);
       console.log("after update ticket", ticket);
       await ticket.save();
 
-      res.json(ticket.comments);
+      res.json(ticket);
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
