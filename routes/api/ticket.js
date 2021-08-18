@@ -230,7 +230,7 @@ router.get("/search", auth, async (req, res) => {
       .then((data) => {
         return res.status(200).send({
           totalItems: data.totalDocs,
-          articles: data.docs,
+          tickets: data.docs,
           totalPages: data.totalPages,
           currentPage: data.page,
         });
