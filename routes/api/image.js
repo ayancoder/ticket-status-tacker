@@ -57,4 +57,14 @@ router.post('/upload', (req, res) => {
     })
   })
 
+router.get('/images/:imagename', (req, res) => {
+
+    let imagename = req.params.imagename
+    let imagepath = __dirname + "/images/" + imagename
+    let image = fs.readFileSync(imagepath)
+    let mime = fileType(image).mime
+
+	res.writeHead(200, {'Content-Type': mime })
+	res.end(image, 'binary')
+})
 module.exports = router;

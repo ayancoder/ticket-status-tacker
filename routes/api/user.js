@@ -145,23 +145,22 @@ router.post(
 router.put(
   "/",
   auth,
-  check('_id', 'id is required').notEmpty(),
+  check('userId', 'userId is required').notEmpty(),
    async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
      // destructure the request
-     const { _id ,name, email, phone, role} = req.body;
-     let userId;
-    if (req.user.role === "ADMIN") {
+     const { userId, name, email, phone, role} = req.body;
+    /* if (req.user.role === "ADMIN") {
       // if admin executing. then use body's user id
       userId = _id;
     }
     else {
        // if user executing. then use id as token's id
        userId = req.user.id;
-    }
+    } */
     // Build user object
     const userFields = {};
     //userFields._id = userId;
@@ -173,9 +172,9 @@ router.put(
     try {
       // Using upsert option (creates new doc if no match is found):
       let user = await User.findOneAndUpdate(
-        { _id: req.user.id },
+        { _id: userId },
         { $set: userFields },
-        { new: true, upsert: true, setDefaultsOnInsert: true }
+        { new: true, setDefaultsOnInsert: true }
       );
       return res.json(user);
     } catch (err) {
