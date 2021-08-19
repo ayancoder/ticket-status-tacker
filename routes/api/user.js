@@ -164,7 +164,7 @@ router.put(
     }
     // Build user object
     const userFields = {};
-    userFields._id = userId;
+    //userFields._id = userId;
     if(name) userFields.name = name;
     if(email) userFields.email = email;
     if(phone) userFields.phone = phone;
