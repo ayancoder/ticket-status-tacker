@@ -12,7 +12,7 @@ const app = express();
 connectDB();
 
 const PORT = process.env | 5000;
-//app.use('/images', express.static('images'));
+app.use('/images', express.static('uploads'));
 
 app.use(cors())
 app.use(express.json({extended : false}));

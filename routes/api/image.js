@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 
-/* const fileFilter = (req, file, callback) => {
+const fileFilter = (req, file, callback) => {
   if(file.mimetype === 'image/jpeg' | 
     file.mimetype === 'image/png'){
       callback(null, true);
@@ -25,9 +25,9 @@ const upload = multer({
     fileSize: 1024 * 1024 * 5,
   },
   fileFilter: fileFilter,
-}); */
+}).single('image'); 
 
-const upload = multer({
+/* const upload = multer({
     dest:'images/', 
     limits: {fileSize: 10000000, files: 1},
     fileFilter:  (req, file, callback) => {
@@ -39,7 +39,7 @@ const upload = multer({
   
         callback(null, true);
     }
-  }).single('image')
+  }).single('image') */
   
 router.post('/upload', (req, res) => {
   
