@@ -164,7 +164,7 @@ router.get("/", auth, async (req, res) => {
     page: req.query.page,
     limit: req.query.limit,
     select:
-      "_id subject source creatorName createDate assignedToName assignDate state priority",
+      "_id subject source creatorName createDate assignedToName assignDate state priority filePath",
     sort: { priority: 1, assignDate: 1 },
   };
 
