@@ -31,7 +31,7 @@ router.post(
         creator: req.user.id,
         creatorName: user.name,
         avatar: user.avatar,
-        filePath: req.body.imagePath,
+        filePath: req.body.filePath,
       });
 
       const ticket = await newTicket.save();
