@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const { check, validationResult } = require("express-validator");
 const auth = require("../../middleware/auth");
 const User = require("../../models/User");
@@ -264,168 +266,366 @@ router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
 router.get("/count", auth, (req, res) => {
   try {
     const state = req.query.state;
-    console.log("state", state);
-
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    console.log("userId: " , userId, "userRole :",userRole);
     // Build query object
-    console.log("reached count api");
-    if (!state) {
-      // get count of new/assigned/in-progress/resolved/closed
-
-      Ticket.aggregate(
-        [
-          {
-            $facet: {
-              newTicket: [
-                {
-                  $match: {
-                    state: "NEW",
+    console.log("reached count api ");
+    if (userRole == "ADMIN") {
+      if (!state) {
+        // get count of new/assigned/in-progress/resolved/closed
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                newTicket: [
+                  {
+                    $match: {
+                      state: "NEW",
+                    },
                   },
-                },
-                {
-                  $count: "newTicket",
-                },
-              ],
-              assignedTicket: [
-                {
-                  $match: {
-                    state: "ASSIGNED",
+                  {
+                    $count: "newTicket",
                   },
-                },
-                {
-                  $count: "assignedTicket",
-                },
-              ],
-              inprogressTicket: [
-                {
-                  $match: {
-                    state: "IN-PROGRESS",
+                ],
+                assignedTicket: [
+                  {
+                    $match: {
+                      state: "ASSIGNED",
+                    },
                   },
-                },
-                {
-                  $count: "inprogressTicket",
-                },
-              ],
-              resolvedTicket: [
-                {
-                  $match: {
-                    state: "RESOLVED",
+                  {
+                    $count: "assignedTicket",
                   },
-                },
-                {
-                  $count: "resolvedTicket",
-                },
-              ],
-            },
-          },
-          {
-            $project: {
-              newTicket: {
-                $arrayElemAt: ["$newTicket.newTicket", 0],
-              },
-              assignedTicket: {
-                $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
-              },
-              inprogressTicket: {
-                $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
-              },
-              resolvedTicket: {
-                $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+                ],
+                inprogressTicket: [
+                  {
+                    $match: {
+                      state: "IN-PROGRESS",
+                    },
+                  },
+                  {
+                    $count: "inprogressTicket",
+                  },
+                ],
+                resolvedTicket: [
+                  {
+                    $match: {
+                      state: "RESOLVED",
+                    },
+                  },
+                  {
+                    $count: "resolvedTicket",
+                  },
+                ],
               },
             },
-          },
-        ],
-        function (err, counts) {
-          if (err) {
-            console.error(err.message);
-            return res.status(500).send("Server Error");
+            {
+              $project: {
+                newTicket: {
+                  $arrayElemAt: ["$newTicket.newTicket", 0],
+                },
+                assignedTicket: {
+                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
+                },
+                inprogressTicket: {
+                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
+                },
+                resolvedTicket: {
+                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+                },
+              },
+            },
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
           }
-          console.log(" --> ", counts[0]);
-          return res.status(200).send(counts[0]);
-        }
-      );
+        );
+      } else {
+        const state = req.query.state;
+        console.log("state is ", state);
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                high: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 1,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "high",
+                  },
+                ],
+                med: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 2,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "med",
+                  },
+                ],
+                low: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 3,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "low",
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                high: {
+                  $arrayElemAt: ["$high.high", 0],
+                },
+                med: {
+                  $arrayElemAt: ["$med.med", 0],
+                },
+                low: {
+                  $arrayElemAt: ["$low.low", 0],
+                },
+              },
+            },
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
+          }
+        );
+      }
     } else {
-      const state = req.query.state;
-      console.log("state is ", state);
-      Ticket.aggregate(
-        [
-          {
-            $facet: {
-              high: [
-                {
-                  $match: {
-                    $and: [
-                      {
-                        state: state,
-                      },
-                      {
-                        priority: 1,
-                      },
-                    ],
+      if (!state) {
+        // get count of new/assigned/in-progress/resolved/closed
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                newTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "NEW",
+                        },
+                        {
+                          assignedTo: ObjectId(userId)
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  $count: "high",
-                },
-              ],
-              med: [
-                {
-                  $match: {
-                    $and: [
-                      {
-                        state: state,
-                      },
-                      {
-                        priority: 2,
-                      },
-                    ],
+                  {
+                    $count: "newTicket",
                   },
-                },
-                {
-                  $count: "med",
-                },
-              ],
-              low: [
-                {
-                  $match: {
-                    $and: [
-                      {
-                        state: state,
-                      },
-                      {
-                        priority: 3,
-                      },
-                    ],
+                ],
+                assignedTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "ASSIGNED",
+                        },
+                        {
+                          assignedTo: ObjectId(userId)
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  $count: "low",
-                },
-              ],
+                  {
+                    $count: "assignedTicket",
+                  },
+                ],
+                inprogressTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "IN-PROGRESS",
+                        },
+                        {
+                          assignedTo: ObjectId(userId)
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "inprogressTicket",
+                  },
+
+                ],
+                resolvedTicket: [
+                
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "RESOLVED",
+                        },
+                        {
+                          assignedTo: ObjectId(userId)
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "resolvedTicket",
+                  },
+
+                ],
+              },
             },
-          },
-          {
-            $project: {
-              high: {
-                $arrayElemAt: ["$high.high", 0],
-              },
-              med: {
-                $arrayElemAt: ["$med.med", 0],
-              },
-              low: {
-                $arrayElemAt: ["$low.low", 0],
+            {
+              $project: {
+                newTicket: {
+                  $arrayElemAt: ["$newTicket.newTicket", 0],
+                },
+                assignedTicket: {
+                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
+                },
+                inprogressTicket: {
+                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
+                },
+                resolvedTicket: {
+                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+                },
               },
             },
-          },
-        ],
-        function (err, counts) {
-          if (err) {
-            console.error(err.message);
-            return res.status(500).send("Server Error");
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
           }
-          console.log(" --> ", counts[0]);
-          return res.status(200).send(counts[0]);
-        }
-      );
+        );
+      } else {
+        const state = req.query.state;
+        console.log("state is ", state);
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                high: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          assignedTo: userId
+                        },
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 1,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "high",
+                  },
+                ],
+                med: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          assignedTo: userId
+                        },
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 2,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "med",
+                  },
+                ],
+                low: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 3,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "low",
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                high: {
+                  $arrayElemAt: ["$high.high", 0],
+                },
+                med: {
+                  $arrayElemAt: ["$med.med", 0],
+                },
+                low: {
+                  $arrayElemAt: ["$low.low", 0],
+                },
+              },
+            },
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
+          }
+        );
+      }
     }
   } catch (err) {
     console.error(err.message);
