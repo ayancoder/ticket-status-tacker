@@ -548,7 +548,7 @@ router.get("/count", auth, (req, res) => {
                     $match: {
                       $and: [
                         {
-                          assignedTo: userId
+                          assignedTo: ObjectId(userId)
                         },
                         {
                           state: state,
@@ -568,7 +568,7 @@ router.get("/count", auth, (req, res) => {
                     $match: {
                       $and: [
                         {
-                          assignedTo: userId
+                          assignedTo: ObjectId(userId)
                         },
                         {
                           state: state,
@@ -587,6 +587,9 @@ router.get("/count", auth, (req, res) => {
                   {
                     $match: {
                       $and: [
+                        {
+                          assignedTo: ObjectId(userId)
+                        },
                         {
                           state: state,
                         },
