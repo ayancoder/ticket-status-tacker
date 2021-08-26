@@ -5,12 +5,17 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  emails: [
+    {
+      type: String,
+    },
+  ],
   address: {
     type: String,
   },
   staffs: [
     {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
   ],

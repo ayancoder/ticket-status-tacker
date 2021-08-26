@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const { check, validationResult } = require("express-validator");
 const auth = require("../../middleware/auth");
-const User = require("../../models/User");
 const checkObjectId = require("../../middleware/checkObjectId");
+const User = require("../../models/User");
 const Ticket = require("../../models/Ticket");
 
 // @route    POST api/tickets
@@ -32,6 +32,7 @@ router.post(
         source: req.body.source,
         creator: req.user.id,
         creatorName: user.name,
+        officeId: user.officeId,
         avatar: user.avatar,
         filePath: req.body.filePath,
       });
@@ -157,9 +158,20 @@ router.get("/", auth, async (req, res) => {
   const priority = req.query.priority;
   // Build query object
   const query = {};
-  if (assignedId) query.assignedTo = assignedId;
+  if (assignedId) {
+    // query for specific user
+    query.assignedTo = assignedId;
+  }else { 
+    // query for admin
+    const adminUserId = req.user.id;
+    const adminUser = await User.findById(adminUserId).select(
+      "-password -tickets -office"
+    );
+    query.officeId = adminUser.officeId;
+  }
   if (state) query.state = state;
   if (priority) query.priority = priority;
+
   console.log("query-->", query);
 
   const options = {
@@ -195,8 +207,11 @@ router.get("/search", auth, async (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
 
-  const subject = req.query.subject;
+  const userId = req.user.id;
+  const user = await User.findById(userId).select("-password -tickets");
+  const officeId = user.officeId;
 
+  const subject = req.query.subject;
   const assignedToName = req.query.assignedToName;
   const state = req.query.state;
   const priority = req.query.priority;
@@ -211,6 +226,7 @@ router.get("/search", auth, async (req, res) => {
       $options: "i",
     };
   }
+  query.officeId = ObjectId(officeId);
   if (subject) {
     query.subject = { $regex: new RegExp(subject), $options: "i" };
   }
@@ -263,174 +279,19 @@ router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
   }
 });
 
-router.get("/count", auth, (req, res) => {
+router.get("/count", auth, async (req, res) => {
   try {
     const state = req.query.state;
     const userId = req.user.id;
     const userRole = req.user.role;
-    console.log("userId: " , userId, "userRole :",userRole);
-    // Build query object
-    console.log("reached count api ");
+    console.log("userId: ", userId, "userRole :", userRole);
+
     if (userRole == "ADMIN") {
-      if (!state) {
-        // get count of new/assigned/in-progress/resolved/closed
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                newTicket: [
-                  {
-                    $match: {
-                      state: "NEW",
-                    },
-                  },
-                  {
-                    $count: "newTicket",
-                  },
-                ],
-                assignedTicket: [
-                  {
-                    $match: {
-                      state: "ASSIGNED",
-                    },
-                  },
-                  {
-                    $count: "assignedTicket",
-                  },
-                ],
-                inprogressTicket: [
-                  {
-                    $match: {
-                      state: "IN-PROGRESS",
-                    },
-                  },
-                  {
-                    $count: "inprogressTicket",
-                  },
-                ],
-                resolvedTicket: [
-                  {
-                    $match: {
-                      state: "RESOLVED",
-                    },
-                  },
-                  {
-                    $count: "resolvedTicket",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                newTicket: {
-                  $arrayElemAt: ["$newTicket.newTicket", 0],
-                },
-                assignedTicket: {
-                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
-                },
-                inprogressTicket: {
-                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
-                },
-                resolvedTicket: {
-                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      } else {
-        const state = req.query.state;
-        console.log("state is ", state);
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                high: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 1,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "high",
-                  },
-                ],
-                med: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 2,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "med",
-                  },
-                ],
-                low: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 3,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "low",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                high: {
-                  $arrayElemAt: ["$high.high", 0],
-                },
-                med: {
-                  $arrayElemAt: ["$med.med", 0],
-                },
-                low: {
-                  $arrayElemAt: ["$low.low", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      }
-    } else {
+      const adminUserId = req.user.id;
+      const adminUser = await User.findById(adminUserId).select(
+        "-password -tickets"
+      );
+      const officeId = adminUser.officeId;
       if (!state) {
         // get count of new/assigned/in-progress/resolved/closed
         Ticket.aggregate(
@@ -445,7 +306,7 @@ router.get("/count", auth, (req, res) => {
                           state: "NEW",
                         },
                         {
-                          assignedTo: ObjectId(userId)
+                          officeId: ObjectId(officeId),
                         },
                       ],
                     },
@@ -462,7 +323,7 @@ router.get("/count", auth, (req, res) => {
                           state: "ASSIGNED",
                         },
                         {
-                          assignedTo: ObjectId(userId)
+                          officeId: ObjectId(officeId),
                         },
                       ],
                     },
@@ -479,7 +340,7 @@ router.get("/count", auth, (req, res) => {
                           state: "IN-PROGRESS",
                         },
                         {
-                          assignedTo: ObjectId(userId)
+                          officeId: ObjectId(officeId),
                         },
                       ],
                     },
@@ -487,10 +348,8 @@ router.get("/count", auth, (req, res) => {
                   {
                     $count: "inprogressTicket",
                   },
-
                 ],
                 resolvedTicket: [
-                
                   {
                     $match: {
                       $and: [
@@ -498,7 +357,7 @@ router.get("/count", auth, (req, res) => {
                           state: "RESOLVED",
                         },
                         {
-                          assignedTo: ObjectId(userId)
+                          officeId: ObjectId(officeId),
                         },
                       ],
                     },
@@ -506,7 +365,6 @@ router.get("/count", auth, (req, res) => {
                   {
                     $count: "resolvedTicket",
                   },
-
                 ],
               },
             },
@@ -548,7 +406,203 @@ router.get("/count", auth, (req, res) => {
                     $match: {
                       $and: [
                         {
-                          assignedTo: ObjectId(userId)
+                          state: state,
+                        },
+                        {
+                          priority: 1,
+                        },
+                        {
+                          officeId: ObjectId(officeId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "high",
+                  },
+                ],
+                med: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 2,
+                        },
+                        {
+                          officeId: ObjectId(officeId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "med",
+                  },
+                ],
+                low: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: state,
+                        },
+                        {
+                          priority: 3,
+                        },
+                        {
+                          officeId: ObjectId(officeId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "low",
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                high: {
+                  $arrayElemAt: ["$high.high", 0],
+                },
+                med: {
+                  $arrayElemAt: ["$med.med", 0],
+                },
+                low: {
+                  $arrayElemAt: ["$low.low", 0],
+                },
+              },
+            },
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
+          }
+        );
+      }
+    } else if (userRole == "TICKET_OPERATOR") {
+      if (!state) {
+        // get count of new/assigned/in-progress/resolved/closed
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                newTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "NEW",
+                        },
+                        {
+                          assignedTo: ObjectId(userId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "newTicket",
+                  },
+                ],
+                assignedTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "ASSIGNED",
+                        },
+                        {
+                          assignedTo: ObjectId(userId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "assignedTicket",
+                  },
+                ],
+                inprogressTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "IN-PROGRESS",
+                        },
+                        {
+                          assignedTo: ObjectId(userId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "inprogressTicket",
+                  },
+                ],
+                resolvedTicket: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          state: "RESOLVED",
+                        },
+                        {
+                          assignedTo: ObjectId(userId),
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    $count: "resolvedTicket",
+                  },
+                ],
+              },
+            },
+            {
+              $project: {
+                newTicket: {
+                  $arrayElemAt: ["$newTicket.newTicket", 0],
+                },
+                assignedTicket: {
+                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
+                },
+                inprogressTicket: {
+                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
+                },
+                resolvedTicket: {
+                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+                },
+              },
+            },
+          ],
+          function (err, counts) {
+            if (err) {
+              console.error(err.message);
+              return res.status(500).send("Server Error");
+            }
+            console.log(" --> ", counts[0]);
+            return res.status(200).send(counts[0]);
+          }
+        );
+      } else {
+        const state = req.query.state;
+        console.log("state is ", state);
+        Ticket.aggregate(
+          [
+            {
+              $facet: {
+                high: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          assignedTo: ObjectId(userId),
                         },
                         {
                           state: state,
@@ -568,7 +622,7 @@ router.get("/count", auth, (req, res) => {
                     $match: {
                       $and: [
                         {
-                          assignedTo: ObjectId(userId)
+                          assignedTo: ObjectId(userId),
                         },
                         {
                           state: state,
@@ -588,7 +642,7 @@ router.get("/count", auth, (req, res) => {
                     $match: {
                       $and: [
                         {
-                          assignedTo: ObjectId(userId)
+                          assignedTo: ObjectId(userId),
                         },
                         {
                           state: state,
@@ -629,6 +683,47 @@ router.get("/count", auth, (req, res) => {
           }
         );
       }
+    } else if (userRole == "TICKET_CREATOR") {
+      Ticket.aggregate(
+        [
+          {
+            $facet: {
+              newTicket: [
+                {
+                  $match: {
+                    $and: [
+                      {
+                        state: "NEW",
+                      },
+                      {
+                        creator: ObjectId(userId),
+                      },
+                    ],
+                  },
+                },
+                {
+                  $count: "newTicket",
+                },
+              ],
+            },
+          },
+          {
+            $project: {
+              newTicket: {
+                $arrayElemAt: ["$newTicket.newTicket", 0],
+              },
+            },
+          },
+        ],
+        function (err, counts) {
+          if (err) {
+            console.error(err.message);
+            return res.status(500).send("Server Error");
+          }
+          console.log(" --> ", counts[0]);
+          return res.status(200).send(counts[0]);
+        }
+      );
     }
   } catch (err) {
     console.error(err.message);

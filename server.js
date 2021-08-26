@@ -6,6 +6,7 @@ const authRouter = require('./routes/api/auth');
 const ticketRouter = require('./routes/api/ticket');
 const profileRouter = require('./routes/api/profile');
 const imageRouter = require('./routes/api/image');
+const officeRouter = require('./routes/api/office');
 
 const app = express();
 // connect to database
@@ -25,5 +26,6 @@ app.use('/api/profiles',profileRouter);
 app.use('/api/auth',authRouter);
 app.use('/api/tickets',ticketRouter);
 app.use('/api/images', imageRouter);
+app.use('/api/offices', officeRouter);
 
 app.listen(PORT, ()=> { console.log(`node started ${PORT}`)})
