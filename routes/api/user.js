@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const gravatar = require('gravatar');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const auth = require('../../middleware/auth');
-const { check, validationResult } = require('express-validator');
-const normalize = require('normalize-url');
-const checkObjectId = require('../../middleware/checkObjectId');
-const User = require('../../models/User');
+const gravatar = require("gravatar");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const auth = require("../../middleware/auth");
+const { check, validationResult } = require("express-validator");
+const normalize = require("normalize-url");
+const checkObjectId = require("../../middleware/checkObjectId");
+const User = require("../../models/User");
 
 // @route    GET api/user/me
 // @desc     Get current users. token is passed in header. user id fetched from token
@@ -46,14 +46,23 @@ router.get(
   }
 );
 
-
 // @route    GET api/user
 // @desc     Get all users
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
-    if (req.user.role === "ADMIN") {
+    if (req.user.role === "SUPER_ADMIN") {
       const users = await User.find();
+      res.json(users);
+    } else if (req.user.role === "ADMIN") {
+      const adminUserId = req.user.id;
+      const adminUser = await User.findById(adminUserId).select(
+        "-password -tickets"
+      );
+      const query = {
+        officeId: adminUser.officeId,
+      };
+      const users = await User.find(query);
       res.json(users);
     } else {
       return res.status(400).json({ msg: "only admin can view all users." });
@@ -64,17 +73,16 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-
 // @route    POST api/users
 // @desc     Register user
 // @access   Public
 router.post(
-  '/',
-  check('name', 'Name is required').notEmpty(),
-  check('email', 'Please include a valid email').isEmail(),
+  "/",
+  check("name", "Name is required").notEmpty(),
+  check("email", "Please include a valid email").isEmail(),
   check(
-    'password',
-    'Please enter a password with 6 or more characters'
+    "password",
+    "Please enter a password with 6 or more characters"
   ).isLength({ min: 6 }),
   async (req, res) => {
     const errors = validationResult(req);
@@ -82,7 +90,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, officeId } = req.body;
 
     try {
       let user = await User.findOne({ email });
@@ -90,14 +98,14 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: 'User already exists' }] });
+          .json({ errors: [{ msg: "User already exists" }] });
       }
 
       const avatar = normalize(
         gravatar.url(email, {
-          s: '200',
-          r: 'pg',
-          d: 'mm'
+          s: "200",
+          r: "pg",
+          d: "mm",
         }),
         { forceHttps: true }
       );
@@ -107,7 +115,8 @@ router.post(
         email,
         avatar,
         password,
-        phone
+        phone,
+        officeId,
       });
 
       const salt = await bcrypt.genSalt(10);
@@ -119,14 +128,14 @@ router.post(
       const payload = {
         user: {
           id: user.id,
-          role: user.role
-        }
+          role: user.role,
+        },
       };
 
       jwt.sign(
         payload,
-        config.get('jwtSecret'),
-        { expiresIn: '5 days' },
+        config.get("jwtSecret"),
+        { expiresIn: "5 days" },
         (err, token) => {
           if (err) throw err;
           res.json({ token });
@@ -134,7 +143,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.message);
-      res.status(500).send('Server error');
+      res.status(500).send("Server error");
     }
   }
 );
@@ -145,14 +154,14 @@ router.post(
 router.put(
   "/",
   auth,
-  check('_id', 'userId is required').notEmpty(),
-   async (req, res) => {
+  check("_id", "userId is required").notEmpty(),
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-     // destructure the request
-     const { _id, name, email, phone, role} = req.body;
+    // destructure the request
+    const { _id, name, email, phone, role } = req.body;
     /* if (req.user.role === "ADMIN") {
       // if admin executing. then use body's user id
       userId = _id;
@@ -164,11 +173,11 @@ router.put(
     // Build user object
     const userFields = {};
     //userFields._id = userId;
-    if(name) userFields.name = name;
-    if(email) userFields.email = email;
-    if(phone) userFields.phone = phone;
-    if(role) userFields.role = role;
-    console.log('usr field',userFields);
+    if (name) userFields.name = name;
+    if (email) userFields.email = email;
+    if (phone) userFields.phone = phone;
+    if (role) userFields.role = role;
+    console.log("usr field", userFields);
     try {
       // Using upsert option (creates new doc if no match is found):
       let user = await User.findOneAndUpdate(
@@ -179,7 +188,7 @@ router.put(
       return res.json(user);
     } catch (err) {
       console.error(err.message);
-      return res.status(500).send('Server Error');
+      return res.status(500).send("Server Error");
     }
   }
 );

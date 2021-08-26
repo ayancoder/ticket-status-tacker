@@ -17,6 +17,10 @@ const TicketSchema = new Schema({
   assignedToName: {
     type: String,
   },
+  officeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "office"
+  },
   subject: {
     type: String,
     required: true,

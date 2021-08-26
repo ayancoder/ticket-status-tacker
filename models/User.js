@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   phone: {
     type: String,
   },
-  office: {
+  officeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "office"
   },
