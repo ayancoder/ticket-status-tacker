@@ -51,6 +51,7 @@ router.get(
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
+    console.log("get all user");
     if (req.user.role === "SUPER_ADMIN") {
       const users = await User.find();
       res.json(users);
@@ -161,7 +162,7 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
     // destructure the request
-    const { _id, name, email, phone, role } = req.body;
+    const { _id, name, email, phone, role, officeId } = req.body;
     /* if (req.user.role === "ADMIN") {
       // if admin executing. then use body's user id
       userId = _id;
@@ -177,6 +178,7 @@ router.put(
     if (email) userFields.email = email;
     if (phone) userFields.phone = phone;
     if (role) userFields.role = role;
+    if(officeId ) userFields.officeId = officeId;
     console.log("usr field", userFields);
     try {
       // Using upsert option (creates new doc if no match is found):
