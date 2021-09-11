@@ -195,4 +195,19 @@ router.put(
   }
 );
 
+ router.delete('/', auth, async (req, res) => {
+  try {
+    // Remove user posts
+    // Remove profile
+    // Remove user
+    await Promise.all([
+      User.findOneAndRemove({ _id: req.user.id })
+    ]);
+
+    res.json({ msg: 'User deleted' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}); 
 module.exports = router;
