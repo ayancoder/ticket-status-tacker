@@ -9,6 +9,7 @@ const { check, validationResult } = require("express-validator");
 const normalize = require("normalize-url");
 const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
+//const Office = require("../../models/Office");
 
 // @route    GET api/user/me
 // @desc     Get current users. token is passed in header. user id fetched from token
@@ -112,12 +113,11 @@ router.post(
       );
 
       user = new User({
-        name,
-        email,
-        avatar,
-        password,
-        phone,
-        officeId,
+        name: name,
+        email: email,
+        avatar: avatar,
+        phone: phone,
+        office: officeId,
       });
 
       const salt = await bcrypt.genSalt(10);
@@ -142,6 +142,14 @@ router.post(
           res.json({ token });
         }
       );
+      // add the use to office staff.
+      if (officeId) {
+        let office = await Office.findOneAndUpdate(
+          { _id: officeId },
+          { $push: { staffs: user._id } },
+          { new: true, setDefaultsOnInsert: true }
+        );
+      }
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
@@ -163,30 +171,29 @@ router.put(
     }
     // destructure the request
     const { _id, name, email, phone, role, officeId } = req.body;
-    /* if (req.user.role === "ADMIN") {
-      // if admin executing. then use body's user id
-      userId = _id;
-    }
-    else {
-       // if user executing. then use id as token's id
-       userId = req.user.id;
-    } */
+
     // Build user object
     const userFields = {};
-    //userFields._id = userId;
     if (name) userFields.name = name;
     if (email) userFields.email = email;
     if (phone) userFields.phone = phone;
     if (role) userFields.role = role;
-    if(officeId ) userFields.officeId = officeId;
+    if (officeId) userFields.office = officeId;
+
     console.log("usr field", userFields);
     try {
-      // Using upsert option (creates new doc if no match is found):
       let user = await User.findOneAndUpdate(
         { _id: _id },
         { $set: userFields },
         { new: true, setDefaultsOnInsert: true }
       );
+      // add the use to office staff.
+      let office = await Office.findOneAndUpdate(
+        { _id: officeId },
+        { $push: { staffs: user._id } },
+        { new: true, setDefaultsOnInsert: true }
+      );
+
       return res.json(user);
     } catch (err) {
       console.error(err.message);
@@ -195,19 +202,25 @@ router.put(
   }
 );
 
- router.delete('/', auth, async (req, res) => {
+ router.delete('/:user_id', auth, async (req, res) => {
   try {
-    // Remove user posts
-    // Remove profile
-    // Remove user
-    await Promise.all([
-      User.findOneAndRemove({ _id: req.user.id })
-    ]);
+    const userId = req.params.user_id;
+    console.log("user id", userId);
+    let user = await User.findOneAndRemove({ _id: userId });
+    if (user) {
+      const officeId = user.office;
+      console.log("office id:", officeId);
 
-    res.json({ msg: 'User deleted' });
+      await Office.findOneAndUpdate(
+        { _id: officeId },
+        { $pull: { staffs: user._id } },
+        { new: true, setDefaultsOnInsert: true }
+      );
+    }
+    res.json({ msg: "User deleted" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 }); 
 module.exports = router;
