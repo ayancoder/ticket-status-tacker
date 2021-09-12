@@ -1,0 +1,36 @@
+const mongoose = require('mongoose');
+
+const counterSchema = new mongoose.Schema({
+  model: { type: String, required: true },
+  identifier: { type: String ,required: true, index: { unique: true }},
+  seq: { type: Number, default: 0 },
+});
+
+counterSchema.statics.getNextId = async function (modelName, identifierName, callback) {
+
+  let incr = await this.findOne({model: modelName,identifier: identifierName});
+
+  if (!incr)
+    incr = await new this({
+      model: modelName,
+      identifier: identifierName,
+    }).save();
+
+  incr.seq++;
+  incr.save();
+  return incr.seq;
+
+};
+
+counterSchema.statics.counterReset = async function (modelName, identifierName, callback) {
+  const filter = { model: modelName, identifier: identifierName };
+  const update = { seq: 0 };
+
+  await Counter.findOneAndUpdate(filter, update, {
+    new: true,
+  });
+};
+
+const Counter = mongoose.model("TicketCounter", counterSchema);
+
+module.exports = Counter;

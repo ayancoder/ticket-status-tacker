@@ -39,7 +39,13 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "office"
   },
-  tickets: [
+  operatedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    }
+  ],
+  createdTickets: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ticket"

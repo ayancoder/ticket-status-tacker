@@ -23,22 +23,24 @@ router.post(
     }
     try {
       console.log("req.user", req.user);
-      const user = await User.findById(req.user.id).select(
-        "-password -tickets -office"
-      );
-      console.log("user -->", user);
+      const user = await User.findById(req.user.id).populate('office');
+
       const newTicket = new Ticket({
         subject: req.body.subject,
         source: req.body.source,
         creator: req.user.id,
         creatorName: user.name,
-        officeId: user.officeId,
+        office: user.office._id,
         avatar: user.avatar,
         filePath: req.body.filePath,
       });
-
       const ticket = await newTicket.save();
-
+      // update user with ticket id
+      await User.findOneAndUpdate(
+        { _id: req.user.id },
+        { $push: {createdTickets: ticket._id} },
+        { new: true, setDefaultsOnInsert: true }
+      );
       return res.json(ticket);
     } catch (err) {
       console.error(err.message);
