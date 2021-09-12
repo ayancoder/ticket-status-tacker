@@ -5,11 +5,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  emails: [
-    {
-      type: String,
-    },
-  ],
+  docketPrefix: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+  },
+
   address: {
     type: String,
   },
