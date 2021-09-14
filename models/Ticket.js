@@ -16,26 +16,32 @@ const TicketSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
+  copiedTo: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user"
+    },
+  ],
   office: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "office"
+    ref: "office",
   },
   subject: {
     type: String,
     required: true,
   },
   description: {
-    type: String
+    type: String,
   },
   source: {
-    type: String
+    type: String,
   },
   priority: {
     type: Number,
   },
   state: {
     type: String,
-    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED", "DUMPPED"],
+    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CONCLUDED", "DUMPPED"],
     default: "NEW",
   },
   filePath: {
@@ -48,11 +54,17 @@ const TicketSchema = new mongoose.Schema({
   assignDate: {
     type: Date,
   },
+  etaDate: {
+    type: Date,
+  },
   comments: [
     {
       postedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
+      },
+      name: {
+        type: String,
       },
       text: {
         type: String,
@@ -61,18 +73,12 @@ const TicketSchema = new mongoose.Schema({
       filePath: {
         type: String,
       },
-      name: {
-        type: String,
-      },
-      avatar: {
-        type: String,
-      },
       date: {
         type: Date,
         default: Date.now,
       },
     },
-  ]
+  ],
 });
 
 TicketSchema.pre("save", async function (next) {

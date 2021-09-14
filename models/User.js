@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["SUPER_ADMIN", "ADMIN", "TICKET_CREATOR", "TICKET_OPERATOR"],
-    default: "TICKET_OPERATOR"
+    default: "TICKET_OPERATOR",
   },
   designation: {
     type: String,
@@ -37,24 +37,50 @@ const UserSchema = new mongoose.Schema({
   },
   office: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "office"
+    ref: "office",
   },
-  operatedTickets: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ticket"
-    }
-  ],
+  // cc-clerk creates ticktes. 
   createdTickets: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ticket"
-    }
+    },
+  ],
+  assignedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  inprogressTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+
+  resolvedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  concludedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  copiedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
   ],
   date: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 UserSchema.plugin(mongoosePaginate);
 module.exports = User = mongoose.model("user", UserSchema);

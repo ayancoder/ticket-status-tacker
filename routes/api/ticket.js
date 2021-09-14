@@ -22,14 +22,13 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      console.log("req.user", req.user);
-      const user = await User.findById(req.user.id).populate('office');
+      console.log("user creating tickets:", req.user);
+      const user = await User.findById(req.user.id).populate("office");
 
       const newTicket = new Ticket({
         subject: req.body.subject,
         source: req.body.source,
         creator: req.user.id,
-        creatorName: user.name,
         office: user.office._id,
         avatar: user.avatar,
         filePath: req.body.filePath,
@@ -38,7 +37,7 @@ router.post(
       // update user with ticket id
       await User.findOneAndUpdate(
         { _id: req.user.id },
-        { $push: {createdTickets: ticket._id} },
+        { $push: { createdTickets: ticket._id } },
         { new: true, setDefaultsOnInsert: true }
       );
       return res.json(ticket);
@@ -65,21 +64,20 @@ router.put(
     const ticketId = req.params.ticket_id;
     const { subject, source, state, priority } = req.body;
     try {
-      // Build ticket object
-      const ticketFields = {};
-      if (subject) ticketFields.subject = subject;
-      if (source) ticketFields.source = source;
-      if (state) ticketFields.state = state;
-      if (priority) ticketFields.priority = priority;
-
-      console.log("ticket field", ticketFields);
-      //new option to true to return the document after update was applied.
-      let ticket = await Ticket.findOneAndUpdate(
-        { _id: ticketId },
-        { $set: ticketFields },
-        { new: true, setDefaultsOnInsert: true }
-      );
+      let ticket = await Ticket.findById(ticketId);
+      // update subject field
       if (ticket) {
+        if (subject) ticket.subject = subject;
+        // update source field
+        if (source) ticket.source = source;
+        // update priority
+        if (priority) ticket.priority = priority;
+        // update state field
+        if (state) {
+          updateTicketInUser(ticketId, ticket.state, state, ticket.assignedTo);
+          ticket.state = state;
+        }
+        await ticket.save();
         return res.json(ticket);
       } else {
         return res.status(400).json({ msg: "ticket not found" });
@@ -90,12 +88,92 @@ router.put(
     }
   }
 );
+// when ticket state change happens -
+// need to remove the ticketId form old state array
+// need to add the ticketId to new state array
+let updateTicketInUser = (
+  ticketId,
+  oldTicketState,
+  newTicketState,
+  assigendToUserId
+) => {
+  removeFromUser(ticketId, oldTicketState, assigendToUserId);
+  addToUser(ticketId, newTicketState, assigendToUserId);
+};
 
-// @route    PUT api/tickets/assign/:ticket_id/:user_id
-// @desc     assign a ticket to user and give priority(passed in body).
+// when ticket state change happens -
+// need to remove the ticketId form old state array
+let removeFromUser = async (ticketId, oldTicketState, userId) => {
+  let user;
+  if (oldTicketState == "ASSIGNED") {
+    user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { assignedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (oldTicketState == "IN-PROGRESS") {
+    user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { inprogressTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (oldTicketState == "RESOLVED") {
+    user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { resolvedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (oldTicketState == "CONCLUDED") {
+    user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { concludedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  //console.log("updated user ", user);
+};
+
+// when ticket state change happens -
+//  need to add the ticketId to new state array
+let addToUser = async (ticketId, newTicketState, userId) => {
+  if (newTicketState == "ASSIGNED") {
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { assignedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (newTicketState == "IN-PROGRESS") {
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { inprogressTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (newTicketState == "RESOLVED") {
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { resolvedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+  if (newTicketState == "CONCLUDED") {
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { concludedTickets: ticketId } },
+      { new: true, setDefaultsOnInsert: true }
+    );
+  }
+};
+
+// @route    PUT api/tickets/assign/:ticket_id
+// @desc     assign a ticket to user and give priority and commennt(passed in body).
+//           generally when ticket is assigned. admin post a comment.
 // @access   Private
-
-  router.put(
+router.put(
   "/assign/:ticket_id",
   checkObjectId("ticket_id"),
   auth,
@@ -107,39 +185,31 @@ router.put(
     const ticketId = req.params.ticket_id;
     try {
       const { assigneeId, priority, commentText } = req.body;
-      const assignedUser = await User.findById(assigneeId).select(
-        "-password -tickets -office"
-      );
-      
       const commentUser = await User.findById(req.user.id).select(
-        "-password -tickets -office"
+        "-password  -office -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
       );
-
-      // Build ticket object
-      const ticketFields = {};
-      ticketFields._id = ticketId;
-      ticketFields.assignedTo = assignedUser._id;
-      ticketFields.assignedToName = assignedUser.name;
-      ticketFields.priority = priority;
-      ticketFields.state = "ASSIGNED";
-      ticketFields.assignDate = Date.now();
-  
-      const newComment = {
-        text: commentText,
-        name: commentUser.name,
-        avatar: commentUser.avatar,
-        user: commentUser.id,
-      };
-
-      ticketFields.comments = newComment
-      console.log("ticket field", ticketFields);
-      //new option to true to return the document after update was applied.
+      // construct the ticket field to be updated.
+      const ticketFields = getTicketFields(
+        assigneeId,
+        priority,
+        commentUser,
+        commentText
+      );
+      console.log("ticket fields:", ticketFields);
+      // udpate the ticket.
       let ticket = await Ticket.findOneAndUpdate(
         { _id: ticketId },
         { $set: ticketFields },
         { new: true, setDefaultsOnInsert: true }
       );
-      if (ticket) {
+
+      if (ticket) { 
+        // add the ticket
+        await User.findOneAndUpdate(
+          { _id: assigneeId },
+          { $push: { assignedTickets: ticketId } },
+          { new: true, setDefaultsOnInsert: true }
+        );
         return res.json(ticket);
       } else {
         return res.status(400).json({ msg: "ticket not found" });
@@ -151,42 +221,39 @@ router.put(
   }
 );
 
+let getTicketFields = (
+  assigendToUserId,
+  priority,
+  commentUser,
+  commentText
+) => {
+  // Build ticket object
+  const ticketFields = {};
+  ticketFields.assignedTo = assigendToUserId;
+  ticketFields.priority = priority;
+  ticketFields.state = "ASSIGNED";
+  ticketFields.assignDate = Date.now();
+  ticketFields.comments = getNewComment(commentUser, commentText);
+  return ticketFields;
+};
+
+let getNewComment = (commentUser, commentText) => {
+  const newComment = {
+    text: commentText,
+    postedBy: commentUser._id,
+    name: commentUser.name
+  };
+  return newComment;
+};
+
 // @route    GET api/tickets
 // @desc     Get all tickets assigned/in-progress/resolved
 // @access   Private
 router.get("/", auth, async (req, res) => {
-  const assignedId = req.query.assign;
-  const state = req.query.state;
-  const priority = req.query.priority;
-  // Build query object
-  const query = {};
-  if (assignedId) {
-    // query for specific user
-    query.assignedTo = assignedId;
-  }else { 
-    // query for admin
-    const adminUserId = req.user.id;
-    const adminUser = await User.findById(adminUserId).select(
-      "-password -tickets -office"
-    );
-    query.officeId = adminUser.officeId;
-  }
-  if (state) query.state = state;
-  if (priority) query.priority = priority;
-
+  const query = await queryParams(req);
   console.log("query-->", query);
+  const options = getQueryOptions(req);
 
-  const options = {
-    page: req.query.page,
-    limit: req.query.limit,
-    select:
-      "_id subject source creatorName createDate assignedToName assignDate state priority filePath",
-    sort: { priority: 1, assignDate: 1 },
-  };
-
-  //const tickets = await Ticket.find(query).sort({ date: -1 });
-  //res.send(tickets);
-  //console.log('tickets', tickets);
   await Ticket.paginate(query, options)
     .then((data) => {
       return res.status(200).send({
@@ -202,66 +269,78 @@ router.get("/", auth, async (req, res) => {
     });
 });
 
-// @route    GET api/tickets/search
-// @desc     Get all tickets
-// @access   Private
-router.get("/search", auth, async (req, res) => {
-  const page = parseInt(req.query.page);
-  const limit = parseInt(req.query.limit);
-
-  const userId = req.user.id;
-  const user = await User.findById(userId).select("-password -tickets");
-  const officeId = user.officeId;
-
+// create query object to get data from data base.
+let queryParams = async (req) => {
+  const assignedId = req.query.assign;
+  const creatorId = req.query.creator;
+  const docketId = req.query.docketId;
   const subject = req.query.subject;
-  const assignedToName = req.query.assignedToName;
   const state = req.query.state;
   const priority = req.query.priority;
-
   const startDate = req.query.startDate;
   const endDate = req.query.endDate;
 
-  let query = {};
-  if (assignedToName) {
-    query.assignedToName = {
-      $regex: new RegExp(assignedToName),
-      $options: "i",
-    };
-  }
-  query.officeId = ObjectId(officeId);
+  // Build query object
+  const query = {};
+
+  if (creatorId) query.creator = creatorId;
+  if (assignedId) query.assignedTo = assignedId;
+  // if creatorId and assiged Id is not spcified then
+  //  get office wise tickts
+  query.office = await getOfficeId(req.user.id);
   if (subject) {
     query.subject = { $regex: new RegExp(subject), $options: "i" };
   }
   if (state) query.state = state;
+  if (docketId) query.docketId = docketId;
   if (priority) query.priority = priority;
   if (startDate) query.createDate = { $gte: startDate, $lte: endDate };
-  console.log("search query-->", query);
 
-  try {
-    const options = {
-      page: page,
-      limit: limit,
-      collation: {
-        locale: "en",
-      },
-    };
+  return query;
+};
+// get office id of user.
+let getOfficeId = async (userId) => {
+  const user = await User.findById(userId).select(
+    "-password  -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
+  );
+  return user.office;
+};
 
-    await Ticket.paginate(query, options)
-      .then((data) => {
-        return res.status(200).send({
-          totalItems: data.totalDocs,
-          tickets: data.docs,
-          totalPages: data.totalPages,
-          currentPage: data.page,
-        });
-      })
-      .catch((err) => {
-        console.log("error in fetching data");
+let getQueryOptions = (req) => {
+  const creator = { path: "assignedTo", select: "name" };
+  const assignedTo = { path: "creator", select: "name" };
+  const options = {
+    page: req.query.page,
+    limit: req.query.limit,
+    select:
+      "_id docketId subject source createDate assignDate state priority filePath",
+    sort: { priority: 1, assignDate: 1 },
+    populate: [creator, assignedTo],
+  };
+  return options;
+};
+// @route    GET api/tickets/search
+// @desc     Get all tickets
+// @access   Private
+router.get("/search", auth, async (req, res) => {
+
+  const query = await queryParams(req);
+  console.log("query-->", query);
+  const options = getQueryOptions(req);
+
+  await Ticket.paginate(query, options)
+    .then((data) => {
+      return res.status(200).send({
+        total: data.totalDocs,
+        tickets: data.docs,
+        totalPages: data.totalPages,
+        currentPage: data.page,
       });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
+    })
+    .catch((err) => {
+      console.log("error in fetching data", err);
+      return res.status(500).send("Server Error");
+    });
 });
 
 // @route    GET api/tickets/:id
@@ -284,454 +363,264 @@ router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
 router.get("/count", auth, async (req, res) => {
   try {
     const state = req.query.state;
-    const userId = req.user.id;
+    const userId = ObjectId(req.user.id);
     const userRole = req.user.role;
-    console.log("userId: ", userId, "userRole :", userRole);
+    console.log("userId: ", userId, ":userRole :", userRole);
 
     if (userRole == "ADMIN") {
-      const adminUserId = req.user.id;
-      const adminUser = await User.findById(adminUserId).select(
-        "-password -tickets"
+      const adminUser = await User.findById(userId).select(
+        "-password -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
       );
-      const officeId = adminUser.officeId;
-      if (!state) {
-        // get count of new/assigned/in-progress/resolved/closed
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                newTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "NEW",
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "newTicket",
-                  },
-                ],
-                assignedTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "ASSIGNED",
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "assignedTicket",
-                  },
-                ],
-                inprogressTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "IN-PROGRESS",
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "inprogressTicket",
-                  },
-                ],
-                resolvedTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "RESOLVED",
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "resolvedTicket",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                newTicket: {
-                  $arrayElemAt: ["$newTicket.newTicket", 0],
-                },
-                assignedTicket: {
-                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
-                },
-                inprogressTicket: {
-                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
-                },
-                resolvedTicket: {
-                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      } else {
-        const state = req.query.state;
-        console.log("state is ", state);
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                high: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 1,
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "high",
-                  },
-                ],
-                med: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 2,
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "med",
-                  },
-                ],
-                low: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 3,
-                        },
-                        {
-                          officeId: ObjectId(officeId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "low",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                high: {
-                  $arrayElemAt: ["$high.high", 0],
-                },
-                med: {
-                  $arrayElemAt: ["$med.med", 0],
-                },
-                low: {
-                  $arrayElemAt: ["$low.low", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      }
+      const officeId = adminUser.office;
+      //const count = ticketCountOfAdmin(officeId, state, res);
+      //return res.status(200).send(count);
+      return ticketCount(null, officeId, state, res)
+
     } else if (userRole == "TICKET_OPERATOR") {
-      if (!state) {
-        // get count of new/assigned/in-progress/resolved/closed
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                newTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "NEW",
-                        },
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "newTicket",
-                  },
-                ],
-                assignedTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "ASSIGNED",
-                        },
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "assignedTicket",
-                  },
-                ],
-                inprogressTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "IN-PROGRESS",
-                        },
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "inprogressTicket",
-                  },
-                ],
-                resolvedTicket: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          state: "RESOLVED",
-                        },
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "resolvedTicket",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                newTicket: {
-                  $arrayElemAt: ["$newTicket.newTicket", 0],
-                },
-                assignedTicket: {
-                  $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
-                },
-                inprogressTicket: {
-                  $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
-                },
-                resolvedTicket: {
-                  $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      } else {
-        const state = req.query.state;
-        console.log("state is ", state);
-        Ticket.aggregate(
-          [
-            {
-              $facet: {
-                high: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 1,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "high",
-                  },
-                ],
-                med: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 2,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "med",
-                  },
-                ],
-                low: [
-                  {
-                    $match: {
-                      $and: [
-                        {
-                          assignedTo: ObjectId(userId),
-                        },
-                        {
-                          state: state,
-                        },
-                        {
-                          priority: 3,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    $count: "low",
-                  },
-                ],
-              },
-            },
-            {
-              $project: {
-                high: {
-                  $arrayElemAt: ["$high.high", 0],
-                },
-                med: {
-                  $arrayElemAt: ["$med.med", 0],
-                },
-                low: {
-                  $arrayElemAt: ["$low.low", 0],
-                },
-              },
-            },
-          ],
-          function (err, counts) {
-            if (err) {
-              console.error(err.message);
-              return res.status(500).send("Server Error");
-            }
-            console.log(" --> ", counts[0]);
-            return res.status(200).send(counts[0]);
-          }
-        );
-      }
+      //const count = ticketCountOfOperator(userId, state);
+      //return res.status(200).send(count);
+      return ticketCount(userId, null, state, res)
+
     } else if (userRole == "TICKET_CREATOR") {
-      Ticket.aggregate(
-        [
-          {
-            $facet: {
-              newTicket: [
-                {
-                  $match: {
-                    $and: [
-                      {
-                        state: "NEW",
-                      },
-                      {
-                        creator: ObjectId(userId),
-                      },
-                    ],
-                  },
-                },
-                {
-                  $count: "newTicket",
-                },
-              ],
-            },
-          },
-          {
-            $project: {
-              newTicket: {
-                $arrayElemAt: ["$newTicket.newTicket", 0],
-              },
-            },
-          },
-        ],
-        function (err, counts) {
-          if (err) {
-            console.error(err.message);
-            return res.status(500).send("Server Error");
-          }
-          console.log(" --> ", counts[0]);
-          return res.status(200).send(counts[0]);
-        }
-      );
+      //const count = ticketCountOfCreator(userId);
+      //return res.status(200).send(count);
+      return ticketCountOfCreator(userId, res);
     }
   } catch (err) {
     console.error(err.message);
     return res.status(500).send("Server Error");
   }
 });
+
+
+const ticketCount = (assigedTo, officeId, state, res) => {
+  if (!state) {
+    // get count of new/assigned/in-progress/resolved/closed
+    //state, priority, assignedTo, createdBy, officeId, countText
+    const newTicket = ticketCountQueryString(
+      "NEW",
+      null,
+      assigedTo,
+      null,
+      officeId,
+      "newTicket"
+    );
+    //console.log('new ticket count query', newTicket);
+    const assignedTicket = ticketCountQueryString(
+      "ASSIGNED",
+      null,
+      assigedTo,
+      null,
+      officeId,
+      "assignedTicket"
+    );
+    //console.log('assigned query', assignedTicket);
+    const inprogressTicket = ticketCountQueryString(
+      "IN-PROGRESS",
+      null,
+      assigedTo,
+      null,
+      officeId,
+      "inprogressTicket"
+    );
+    //console.log("inprogress query ", inprogressTicket)
+    const resolvedTicket = ticketCountQueryString(
+      "RESOLVED",
+      null,
+      assigedTo,
+      null,
+      officeId,
+      "resolvedTicket"
+    );
+    //console.log("resolved query", resolvedTicket);
+    Ticket.aggregate(
+      [
+        {
+          $facet: {
+            newTicket: newTicket,
+            assignedTicket: assignedTicket,
+            inprogressTicket: inprogressTicket,
+            resolvedTicket: resolvedTicket,
+          },
+        },
+        {
+          $project: {
+            newTicket: {
+              $arrayElemAt: ["$newTicket.newTicket", 0],
+            },
+            assignedTicket: {
+              $arrayElemAt: ["$assignedTicket.assignedTicket", 0],
+            },
+            inprogressTicket: {
+              $arrayElemAt: ["$inprogressTicket.inprogressTicket", 0],
+            },
+            resolvedTicket: {
+              $arrayElemAt: ["$resolvedTicket.resolvedTicket", 0],
+            },
+          },
+        },
+      ],
+      function (err, counts) {
+        if (err) {
+          //console.error(err.message);
+          return res.status(500).send("Server Error");
+        }
+        console.log("admin -->", counts[0]);
+        return res.status(200).send(counts[0]);
+      }
+    );
+  } else {
+    //state, priority, assignedTo, createdBy, officeId, countText
+    const highPriority = ticketCountQueryString(
+      state,
+      1,
+      assigedTo,
+      null,
+      officeId,
+      "high"
+    );
+    //console.log('new ticket count query', newTicket);
+    const medPriority = ticketCountQueryString(
+      state,
+      2,
+      assigedTo,
+      null,
+      officeId,
+      "med"
+    );
+    //console.log('assigned query', assignedTicket);
+    const lowPriority = ticketCountQueryString(
+      state,
+      3,
+      assigedTo,
+      null,
+      officeId,
+      "low"
+    );
+    //console.log("inprogress query ", inprogressTicket)
+    Ticket.aggregate(
+      [
+        {
+          $facet: {
+            high: highPriority,
+            med: medPriority,
+            low: lowPriority,
+          },
+        },
+        {
+          $project: {
+            high: {
+              $arrayElemAt: ["$high.high", 0],
+            },
+            med: {
+              $arrayElemAt: ["$med.med", 0],
+            },
+            low: {
+              $arrayElemAt: ["$low.low", 0],
+            },
+          },
+        },
+      ],
+      function (err, counts) {
+        if (err) {
+          console.error(err.message);
+          return res.status(500).send("Server Error");
+        }
+        console.log("admin tickets ", counts[0]);
+        return res.status(200).send(counts[0]);
+      }
+    );
+  }
+};
+
+const ticketCountOfCreator = (createdBy, res) => {
+  const newTicket = ticketCountQueryString(
+    "NEW",
+    null,
+    null,
+    createdBy,
+    null,
+    "newTicket"
+  );
+  Ticket.aggregate(
+    [
+      {
+        $facet: {
+          newTicket: newTicket,
+        },
+      },
+      {
+        $project: {
+          newTicket: {
+            $arrayElemAt: ["$newTicket.newTicket", 0],
+          },
+        },
+      },
+    ],
+    function (err, counts) {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send("Server Error");
+      }
+      console.log(" --> ", counts[0]);
+      return res.status(200).send(counts[0]);
+      //return counts[0];
+    }
+  );
+};
+
+const ticketCountQueryString = (
+  state,
+  priority,
+  assignedTo,
+  createdBy,
+  officeId,
+  countText
+) => {
+
+  const andQueryArray = [];
+  const stateQuery = {};
+  if (state) {
+    stateQuery.state = state;
+    andQueryArray.push(stateQuery);
+  }
+
+  const priorityQuery = {};
+  if (priority) {
+    priorityQuery.priority = priority;
+    andQueryArray.push(priorityQuery);
+  }
+  const assignedToQuery = {};
+  if (assignedTo) {
+    assignedToQuery.assignedTo = assignedTo;
+    andQueryArray.push(assignedToQuery);
+  }
+  const createdByQuery = {};
+  if (createdBy) {
+    createdByQuery.creator = createdBy;
+    andQueryArray.push(createdByQuery);
+  }
+
+  const officeQuery = {};
+
+  if (officeId) {
+    officeQuery.office = officeId;
+    andQueryArray.push(officeQuery);
+  }
+  const countQuery = { $count: countText };
+  console.log("query ->", JSON.stringify(andQueryArray));
+  const query = [
+    {
+      $match: {
+        $and: andQueryArray,
+      },
+    },
+    countQuery,
+  ];
+  return query;
+};
+
+
 // @route    DELETE api/tickets/:id
 // @desc     Delete a ticket
 // @access   Private
@@ -761,42 +650,37 @@ router.delete("/:id", [auth, checkObjectId("id")], async (req, res) => {
 // @route    POST api/tickets/comment/:id
 // @desc     Comment on a ticket
 // @access   Private
-router.post(
-  "/comment/:id",
-  auth,
-  checkObjectId("id"),
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      const user = await User.findById(req.user.id).select("-password");
-      const ticket = await Ticket.findById(req.params.id);
-     
-      const newComment = {
-        text: req.body.commentText,
-        name: user.name,
-        avatar: user.avatar,
-        user: req.user.id,
-      };
-      const state =req.body.state;
-      const priority = req.body.priority
-      if(state) ticket.state = state;
-      if(priority) ticket.priority = priority;
-
-      ticket.comments.unshift(newComment);
-      console.log("after update ticket", ticket);
-      await ticket.save();
-
-      res.json(ticket);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server Error");
-    }
+router.post("/comment/:id", auth, checkObjectId("id"), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-);
+
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    const ticket = await Ticket.findById(req.params.id);
+
+    const newComment = {
+      text: req.body.commentText,
+      name: user.name,
+      avatar: user.avatar,
+      user: req.user.id,
+    };
+    const state = req.body.state;
+    const priority = req.body.priority;
+    if (state) ticket.state = state;
+    if (priority) ticket.priority = priority;
+
+    ticket.comments.unshift(newComment);
+    console.log("after update ticket", ticket);
+    await ticket.save();
+
+    res.json(ticket);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 // @route    DELETE api/posts/comment/:id/:comment_id
 // @desc     Delete comment
