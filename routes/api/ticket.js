@@ -33,14 +33,21 @@ router.post(
         avatar: user.avatar,
         filePath: req.body.filePath,
       });
-      const ticket = await newTicket.save();
+      let ticket = await newTicket.save();
       // update user with ticket id
       await User.findOneAndUpdate(
         { _id: req.user.id },
         { $push: { createdTickets: ticket._id } },
         { new: true, setDefaultsOnInsert: true }
       );
-      return res.json(ticket);
+      const creator = { path: "creator", select: "name" };
+      Ticket.populate(ticket, creator, function (err, data) {
+        if(err) {
+          console.log("could not save ticket", err);
+        }
+        return res.json(ticket);
+      }); 
+      
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
@@ -307,8 +314,8 @@ let getOfficeId = async (userId) => {
 };
 
 let getQueryOptions = (req) => {
-  const creator = { path: "assignedTo", select: "name" };
-  const assignedTo = { path: "creator", select: "name" };
+  const assignedTo  = { path: "assignedTo", select: "name" };
+  const creator = { path: "creator", select: "name" };
   const options = {
     page: req.query.page,
     limit: req.query.limit,
@@ -348,7 +355,9 @@ router.get("/search", auth, async (req, res) => {
 // @access   Private
 router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.ticket_id);
+    const creator = { path: "assignedTo", select: "name" };
+   const assignedTo = { path: "creator", select: "name" };
+    const ticket = await Ticket.findById(req.params.ticket_id).populate([creator, assignedTo]);
 
     if (!ticket) {
       return res.status(404).json({ msg: "Ticket not found" });

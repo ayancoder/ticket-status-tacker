@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { route } = require("./ticket");
 
 const fileFilter = (req, file, callback) => {
   if(file.mimetype === 'image/jpeg' | 
@@ -59,15 +58,4 @@ router.post('/upload', (req, res) => {
   })
 
   
-/* router.get('/images/:imagename', (req, res) => {
-    console.log("get image ", imagename);
-    let imagename = req.params.imagename
-    let imagepath = __dirname + "/uploads/" + imagename
-    let image = fs.readFileSync(imagepath)
-    let mime = fileType(image).mime
-
-	res.writeHead(200, {'Content-Type': mime })
-	res.end(image, 'binary')
-}); */
-
 module.exports = router;
