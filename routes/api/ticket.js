@@ -313,7 +313,7 @@ let getOfficeId = async (userId) => {
   return user.office;
 };
 
-let getQueryOptions = (req) => {
+const getQueryOptions = (req) => {
   const assignedTo  = { path: "assignedTo", select: "name" };
   const creator = { path: "creator", select: "name" };
   const options = {
