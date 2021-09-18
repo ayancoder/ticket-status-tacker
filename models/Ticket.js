@@ -44,9 +44,14 @@ const TicketSchema = new mongoose.Schema({
     enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CONCLUDED", "DUMPPED"],
     default: "NEW",
   },
-  filePath: {
-    type: String,
-  },
+  imageFilePath: [{ 
+    type: String
+  
+  }],
+   pdfFilePath: [{ 
+    type: String
+  
+  }],
   createDate: {
     type: Date,
     default: Date.now,
@@ -90,7 +95,7 @@ TicketSchema.pre("save", async function (next) {
     const mon = event.getMonth() + 1;
     const day = event.getDate();
     const year = event.getFullYear();
-    const dateStr = mon + "-" + day + "-" + year;
+    const dateStr = day + "-" + mon + "-" + year;
     const docketId = office.docketPrefix + "/" + dateStr + "/" + id;
     this.docketId = docketId;
     next();

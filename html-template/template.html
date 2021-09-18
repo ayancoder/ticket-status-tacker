@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+ <html>
+    <head>
+        <mate charest="utf-8" />
+        <title>Hello world!</title>
+    </head>
+    <style>
+   img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    table, th, td {
+     border: 1px solid black;
+     border-collapse: collapse;
+    }
+    h1,h2,h3,h4,h5 {
+    text-align:center;
+   }   
+    </style>
+
+    <body>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Emblem_of_West_Bengal.png" width="60" height="60">
+      <h2>Government of West Bengal</h2>
+      <h4>Office of the Block Development Officer</h4>
+      <h5>{{office.address}}</h5>
+      <table style="width:100%">
+        <colgroup>
+          <col span="1" style="width: 20%;">
+          <col span="1" style="width: 40%;">
+          <col span="1" style="width: 20%;">
+          <col span="1" style="width: 20%;">
+       </colgroup>
+        <tr>
+          <th>Docket No.</th>
+          <th>Subject</th>
+          <th>Assigned To</th>
+          <th>Signature</th>
+        </tr>
+        {{#each tickets}}
+        <tr>
+          <td>{{this.docketId}}</td>
+          <td>{{this.subject}}</td>
+          <td>{{this.assignedTo.name}}</td>
+          <td></td>
+        </tr>
+        {{/each}}
+      </table>
+    </body>
+</html>   
