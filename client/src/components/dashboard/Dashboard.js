@@ -15,11 +15,9 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
-import MenuIcon from "@material-ui/icons/Menu";
-import NotificationsIcon from "@material-ui/icons/Notifications";
-import NestedList from "./NestedList";
-import { reportsListItems, userListItems } from "./listItems";
+import { connect } from "react-redux";
 import Chart from "./Chart";
+import { login } from "../../actions/auth";
 import TicketCountCard from "./TicketsCountCard";
 import TicketsTable from "../ticket/TicketTable";
 import Navbar from "./Navbar";
@@ -79,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Dashboard() {
+function Dashboard({ auth }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
 
@@ -109,12 +107,16 @@ export default function Dashboard() {
             <Grid item xs={12} md={6} lg={4}>
               <TicketCountCard ticketType="New Ticket" color="secondary" />
             </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <TicketCountCard ticketType="Open Ticket" color="primary" />
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <TicketCountCard ticketType="Closed Ticket" color="default" />
-            </Grid>
+            {auth.user != null && auth.user.role !== "TICKET_OPERATOR" && (
+              <Grid item xs={12} md={6} lg={4}>
+                <TicketCountCard ticketType="Open Ticket" color="primary" />
+              </Grid>
+            )}
+            {auth.user != null && auth.user.role !== "TICKET_OPERATOR" && (
+              <Grid item xs={12} md={6} lg={4}>
+                <TicketCountCard ticketType="Closed Ticket" color="primary" />
+              </Grid>
+            )}
             {/* Chart */}
             <Grid item xs={12}>
               <Paper className={fixedHeightPaper}>
@@ -123,7 +125,7 @@ export default function Dashboard() {
             </Grid>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-              <TicketsTable withLink="false" />
+              <TicketsTable withLink="dashboard" />
             </Grid>
           </Grid>
 
@@ -135,3 +137,9 @@ export default function Dashboard() {
     </div>
   );
 }
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+});
+
+export default connect(mapStateToProps)(Dashboard);

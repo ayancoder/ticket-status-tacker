@@ -6,7 +6,6 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
-import TicketsTable from "./TicketTable";
 import Navbar from "../dashboard/Navbar";
 import { Button, TextField } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
@@ -148,58 +147,28 @@ const useStyles = makeStyles((theme) => ({
   },
   submitcontainer: {
     marginTop: theme.spacing(3),
-    // marginLeft:theme.spacing(13)
   },
 }));
 
-function NewTicket({ newTickets, addtickets }) {
+function ReportGenerate() {
   const classes = useStyles();
-  const [isclose, setIsClose] = React.useState(0);
-  const [selectedFile, setSelectedFile] = React.useState([]);
-  const [subject, setSubject] = React.useState(null);
-  const [source, setSource] = React.useState(null);
-  const [fileName, setFileName] = React.useState(null);
+  const [fromDate, setFromDate] = React.useState("");
+  const [toDate, setToDate] = React.useState("");
 
-  React.useEffect(() => {
-    const parsedIsClose = true;
-    setIsClose(parsedIsClose);
-  }, []);
-
-  React.useEffect(() => {
-    localStorage.setItem("isclose", isclose);
-  }, [isclose]);
-
-  const onFileChange = (e) => {
-    let str = "";
-    for (let i = 0; i < e.target.files.length; i++) {
-      str += e.target.files[i].name + ",";
-      var selected = selectedFile;
-      selected.push(e.target.files[i]);
-      setSelectedFile(selected);
-    }
-    setFileName(str);
+  const onfromDateChange = (e) => {
+    setFromDate(e.target.value);
+    console.log(e.target.value);
   };
 
-  const onSubjectChange = (e) => {
-    setSubject(e.target.value);
+  const onToDateChange = (e) => {
+    setToDate(e.target.value);
   };
 
-  const onSourceChange = (e) => {
-    setSource(e.target.value);
-  };
-
-  const onSubmit = (event) => {
-    console.log(selectedFile[0].fileName);
-    console.log(subject);
-    console.log(source);
-    addtickets(subject, source, selectedFile[0].fileName);
-  };
-
-  console.log(newTickets);
+  const onSubmit = (event) => {};
 
   return (
-    <div className={classes.root}>
-      <Navbar />
+    <div>
+      {/* <Navbar />
       <main className={classes.content}>
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
@@ -207,10 +176,11 @@ function NewTicket({ newTickets, addtickets }) {
               <Paper className={classes.headingPaper}>
                 <Typography
                   variant="h5"
+                  align="center"
                   className={classes.ticketTypography}
                   gutterBottom
                 >
-                  <b>New Ticket</b>
+                  <b>Generate Report</b>
                 </Typography>
               </Paper>
             </Grid>
@@ -225,65 +195,25 @@ function NewTicket({ newTickets, addtickets }) {
                     <Grid container>
                       <Grid item xs={12} md={6} lg={4}>
                         <Typography variant="h6" className={classes.formTypo}>
-                          <b>Subject </b>
+                          <b>From Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
                         <TextField
-                          id="standard-textarea"
-                          multiline
-                          style={{ textAlign: "left", width: "20rem" }}
-                          // variant="outlined"
-                          onChange={onSubjectChange}
+                          type="date"
+                          onChange={onfromDateChange}
+                          value={fromDate}
                         />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.descrptioncontainer}>
                       <Grid item xs={12} md={6} lg={4}>
                         <Typography variant="h6" className={classes.formTypo}>
-                          <b>Source </b>
+                          <b>To Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
-                        <Select
-                          labelId="simple-select-label-source"
-                          id="simple-select-source"
-                          value={source}
-                          onChange={onSourceChange}
-                          style={{ width: "20rem" }}
-                        >
-                          <MenuItem value={"State"}>State</MenuItem>
-                          <MenuItem value={"District"}>District</MenuItem>
-                          <MenuItem value={"Sub-Division"}>
-                            Sub-Division
-                          </MenuItem>
-                          <MenuItem value={"Gram Panchayat"}>
-                            Gram Panchayat
-                          </MenuItem>
-                          <MenuItem value={"Other Block Offices"}>
-                            Other Block Offices
-                          </MenuItem>
-                          <MenuItem value={"Others"}>Others</MenuItem>
-                        </Select>
-                      </Grid>
-                    </Grid>
-                    <Grid container className={classes.descrptioncontainer}>
-                      <Grid item xs={12} md={6} lg={12}>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          component="label"
-                        >
-                          Upload
-                          <input
-                            type="file"
-                            style={{ display: "none" }}
-                            onChange={onFileChange}
-                            multiple
-                          />
-                        </Button>
-                        &nbsp;&nbsp;
-                        {fileName === null ? "Select File" : fileName}
+                        <TextField type="date" variant="outlined" />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.submitcontainer}>
@@ -293,9 +223,9 @@ function NewTicket({ newTickets, addtickets }) {
                           color="primary"
                           onClick={onSubmit}
                           style={{ marginRight: "4rem" }}
-                          disabled={!source || !subject}
+                          disabled={!fromDate || !toDate}
                         >
-                          Submit
+                          Generate Report
                         </Button>
                       </Grid>
                     </Grid>
@@ -303,24 +233,26 @@ function NewTicket({ newTickets, addtickets }) {
                 </Paper>
               </Grid>
             </form>
-            {/* Recent Tickets */}
-            <Grid item xs={12}>
-              <TicketsTable withLink="newticket" />
-            </Grid>
           </Grid>
 
           <Box pt={4}>
             <Copyright />
           </Box>
         </Container>
-      </main>
+      </main> */}
+      <TextField
+        type="date"
+        inputVariant="outlined"
+        value={fromDate}
+        onChange={onfromDateChange}
+      />
     </div>
   );
 }
 
-const mapStateToProps = (state) => ({
-  user: state.auth.user,
-  newTickets: state,
-});
+// const mapStateToProps = (state) => ({
+//   user: state.auth.user,
+//   newTickets: state,
+// });
 
-export default connect(mapStateToProps, { tickets, addtickets })(NewTicket);
+export default ReportGenerate;

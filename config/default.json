@@ -1,4 +1,4 @@
 {
-    "mongoURI" : "mongodb://localhost:27017/nodeDB",
-    "jwtSecret": "my-token"
+  "mongoURI": "mongodb://localhost:27017/testDB",
+  "jwtSecret": "my-token"
 }
