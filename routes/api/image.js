@@ -24,11 +24,9 @@ const storage = multer.diskStorage({
 
     User.findById(userId).populate("office").then(user => {
       const officeName = user.office.docketPrefix
-      console.log("office name", officeName);
       const dir = "./uploads/" + officeName + "/" + getDate();
       console.log("dir:",dir)
       if (!fs.existsSync(dir)) {
-        console.log("creating dir")
         fs.mkdirSync(dir, { recursive: true });
       }
       callback(null, dir);
