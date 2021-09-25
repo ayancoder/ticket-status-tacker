@@ -44,9 +44,11 @@ router.get("/", async (req, res) => {
 // @route    POST api/office
 // @desc     Register a office.
 // @access   only super admi can create a office.
-router.post("/", auth, async (req, res) => {
+router.post("/", 
+check("docketPrefix", "docket prefix  is required").notEmpty(),
+auth, async (req, res) => {
   if (req.user.role == "SUPER_ADMIN") {
-    const { name, shortName, address, email } = req.body;
+    const { name, docketPrefix, address, email } = req.body;
     try {
       let office = await Office.findOne({ email });
 
@@ -58,7 +60,7 @@ router.post("/", auth, async (req, res) => {
 
       office = new Office({
         name: name,
-        docketPrefix: shortName,
+        docketPrefix: docketPrefix,
         address: address,
         email: email,
       });
