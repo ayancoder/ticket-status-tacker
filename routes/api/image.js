@@ -2,6 +2,9 @@ const { json } = require("express");
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const User = require('../../models/User');
+const Office = require('../../models/Office')
+const auth = require("../../middleware/auth");
 var fs = require('fs');
 
 const fileFilter = (req, file, callback) => {
@@ -17,14 +20,23 @@ const fileFilter = (req, file, callback) => {
 }
 const storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    const dir = "./uploads/"+getDate();
-    if (!fs.existsSync(dir)){
+    const userId = req.user.id;
+
+    User.findById(userId).populate("office").then(user => {
+      const officeName = user.office.docketPrefix
+      console.log("office name", officeName);
+      const dir = "./uploads/" + officeName + "/" + getDate();
+      console.log("dir:",dir)
+      if (!fs.existsSync(dir)) {
+        console.log("creating dir")
         fs.mkdirSync(dir, { recursive: true });
-    } 
-    callback(null, dir);
+      }
+      callback(null, dir);
+
+    })
   },
   filename: function (req, file, callback) {
-    callback(null, new Date().toISOString() +"-" +file.originalname);
+    callback(null, new Date().toISOString() + "-" + file.originalname);
   },
 });
 
@@ -55,7 +67,7 @@ const upload = multer({
 }).array('image'); 
 
   
-router.post("/upload", (req, res) => {
+router.post("/upload", auth, (req, res) => {
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
@@ -74,7 +86,7 @@ router.post("/upload", (req, res) => {
       res
         .status(200)
         .json({
-          message: "Image Uploaded Successfully !",
+          message: "Attachment Uploaded Successfully !",
           pdf: pdfFilePath,
           img: imgFilePath,
         });

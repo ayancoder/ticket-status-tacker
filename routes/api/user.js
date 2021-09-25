@@ -56,7 +56,7 @@ router.get("/", auth, async (req, res) => {
     if (req.user.role === "SUPER_ADMIN") {
       const users = await User.find();
       res.json(users);
-    } else if (req.user.role === "ADMIN") {
+    } else if (req.user.role === "BDO") {
       const adminUserId = req.user.id;
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
@@ -67,7 +67,7 @@ router.get("/", auth, async (req, res) => {
       const users = await User.find(query);
       res.json(users);
     } else {
-      return res.status(400).json({ msg: "only admin can view all users." });
+      return res.status(400).json({ msg: "only BDO can view all users." });
     }
   } catch (err) {
     console.error(err.message);
@@ -81,7 +81,7 @@ router.get("/", auth, async (req, res) => {
 router.post(
   "/",
   check("name", "Name is required").notEmpty(),
-  check("email", "Please include a valid email").isEmail(),
+  check("phone", "Mobile no. is required").notEmpty(),
   check(
     "password",
     "Please enter a password with 6 or more characters"
@@ -95,7 +95,7 @@ router.post(
     const { name, email, password, phone, officeId } = req.body;
 
     try {
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ phone });
 
       if (user) {
         return res

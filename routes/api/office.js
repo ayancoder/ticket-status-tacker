@@ -47,6 +47,10 @@ router.get("/", async (req, res) => {
 router.post("/", 
 check("docketPrefix", "docket prefix  is required").notEmpty(),
 auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   if (req.user.role == "SUPER_ADMIN") {
     const { name, docketPrefix, address, email } = req.body;
     try {
