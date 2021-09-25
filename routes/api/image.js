@@ -28,19 +28,6 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single('image'); 
 
-/* const upload = multer({
-    dest:'images/', 
-    limits: {fileSize: 10000000, files: 1},
-    fileFilter:  (req, file, callback) => {
-    
-        if (!file.originalname.match(/\.(jpg|jpeg)$/)) {
-  
-            return callback(new Error('Only Images are allowed !'), false)
-        }
-  
-        callback(null, true);
-    }
-  }).single('image') */
   
 router.post('/upload', (req, res) => {
   
@@ -58,16 +45,5 @@ router.post('/upload', (req, res) => {
     })
   })
 
-  
-/* router.get('/images/:imagename', (req, res) => {
-    console.log("get image ", imagename);
-    let imagename = req.params.imagename
-    let imagepath = __dirname + "/uploads/" + imagename
-    let image = fs.readFileSync(imagepath)
-    let mime = fileType(image).mime
-
-	res.writeHead(200, {'Content-Type': mime })
-	res.end(image, 'binary')
-}); */
 
 module.exports = router;
