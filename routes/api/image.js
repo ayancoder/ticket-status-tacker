@@ -44,18 +44,9 @@ const getDate = () => {
   const day = event.getDate();
   const year = event.getFullYear();
   const dateStr = day + "-" + mon + "-" + year;
-  console.log("getTime", getTime());
   return dateStr;
 };
-const getTime =() =>{
 
-  const event = new Date();
-  const hour = event.getHours() ;
-  const min = event.getMinutes();
-  const sec = event.getSeconds();
-  const timeStr = hour + "-" + min + "-" + sec;
-  return timeStr;
-}
 const upload = multer({
   storage: storage,
   limits: {
