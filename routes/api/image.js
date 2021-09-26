@@ -5,7 +5,9 @@ const multer = require("multer");
 const User = require('../../models/User');
 const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
+const imageConverter = require("../../converter/pdfToImg")
 var fs = require('fs');
+const convertPdfToImg = require("../../converter/pdfToImg");
 
 const fileFilter = (req, file, callback) => {
  console.log("file -->", file)
@@ -62,11 +64,12 @@ router.post("/upload", auth, (req, res) => {
       res.status(400).json({ message: err.message });
     } else {
       //console.log("req", req);
-      let pdfFilePath = [];
+      //let pdfFilePath = [];
       let imgFilePath = [];
       req.files.forEach((file) => {
         if (file.mimetype == "application/pdf") {
-          pdfFilePath.push(file.path);
+          //pdfFilePath.push(file.path);
+          convertPdfToImg(file.path);
         } else {
           imgFilePath.push(file.path);
         }
