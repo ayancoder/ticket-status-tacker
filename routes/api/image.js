@@ -8,8 +8,6 @@ const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
 //const imageConverter = require("../../converter/pdfToImg")
 const fs = require('fs');
-var fs = require('fs');
-
 
 const fileFilter = (req, file, callback) => {
  console.log("file -->", file)
