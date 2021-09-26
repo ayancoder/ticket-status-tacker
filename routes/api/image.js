@@ -2,12 +2,13 @@ const { json } = require("express");
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const pdf = require('pdf-poppler');
 const User = require('../../models/User');
 const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
-const imageConverter = require("../../converter/pdfToImg")
+//const imageConverter = require("../../converter/pdfToImg")
 var fs = require('fs');
-const convertPdfToImg = require("../../converter/pdfToImg");
+
 
 const fileFilter = (req, file, callback) => {
  console.log("file -->", file)
@@ -86,5 +87,21 @@ router.post("/upload", auth, (req, res) => {
   });
 });
 
-  
+const convertPdfToImg = (file) => {
+
+  let opts = {
+      format: 'jpeg',
+      out_dir: path.dirname(file),
+      out_prefix: path.baseName(file, path.extname(file)),
+      page: null
+  }
+
+  pdf.convert(file, opts)
+      .then(res => {
+          console.log('Successfully converted', res);
+      })
+      .catch(error => {
+          console.error(error);
+      })
+}
 module.exports = router;
