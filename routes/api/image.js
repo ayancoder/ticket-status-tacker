@@ -74,12 +74,11 @@ router.post("/upload", auth, (req, res) => {
           imgFilePath.push(file.path);
         }
       });
-      console.log("files ", pdfFilePath, imgFilePath );
+      console.log("files ", imgFilePath );
       res
         .status(200)
         .json({
           message: "Attachment Uploaded Successfully !",
-          pdf: pdfFilePath,
           img: imgFilePath,
         });
     }
