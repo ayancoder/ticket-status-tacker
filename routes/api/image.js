@@ -2,7 +2,6 @@ const { json } = require("express");
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const pdf2jpg = require('pdf2jpg');
 const User = require('../../models/User');
 const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
@@ -58,37 +57,32 @@ const upload = multer({
 }).array('image'); 
 
   
-router.post("/upload", auth, (req, res) => {
+router.post("/upload", (req, res) => {
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
     } else {
       //console.log("req", req);
-      //let pdfFilePath = [];
+      let pdfFilePath = [];
       let imgFilePath = [];
       req.files.forEach((file) => {
         if (file.mimetype == "application/pdf") {
-          //pdfFilePath.push(file.path);
-          convertPdfToImg(file.path);
+          pdfFilePath.push(file.path);
         } else {
           imgFilePath.push(file.path);
         }
       });
-      console.log("files ", imgFilePath );
+      console.log("files ", pdfFilePath, imgFilePath );
       res
         .status(200)
         .json({
-          message: "Attachment Uploaded Successfully !",
+          message: "Image Uploaded Successfully !",
+          pdf: pdfFilePath,
           img: imgFilePath,
         });
     }
   });
 });
 
-const convertPdfToImg = (file) => {
-  console.log("file", file)
-  const source = fs.readFileSync(file); // can be buffer or just url
-  pdf2jpg(source).then(buffer => fs.writeFileSync('out.jpg', buffer))
-}
 
 module.exports = router;
