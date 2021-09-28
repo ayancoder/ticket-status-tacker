@@ -41,13 +41,14 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
     if (localStorage.token) {
       setAuthToken(localStorage.token);
     }
-    var pdfFilePath = [];
-    var imageFilePath = [];
+    // var pdfFilePath = [];
+    // var imageFilePath = [];
 
     try {
       var data = new FormData();
-      console.log(files);
-      data.append("image", Array.of(files));
+      for (var i = 0; i < files.length; i++) {
+        data.append("image", files[i]);
+      }
 
       const config = {
         headers: {
@@ -63,7 +64,7 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
     } catch (err) {
       console.log(err);
     }
-    // const config = {
+    // const config_ticket = {
     //   headers: {
     //     "Content-Type": "application/json",
     //   },
