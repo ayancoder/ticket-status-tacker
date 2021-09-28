@@ -66,11 +66,11 @@ const Login = ({ login, isAuthenticated }) => {
   const classes = useStyles();
 
   const [formData, setFormData] = useState({
-    email: "",
     password: "",
+    phone: "",
   });
 
-  const { email, password } = formData;
+  const { password, phone } = formData;
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -78,7 +78,7 @@ const Login = ({ login, isAuthenticated }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     console.log(e);
-    login(email, password);
+    login(password, phone);
   };
 
   if (isAuthenticated) {
@@ -107,12 +107,10 @@ const Login = ({ login, isAuthenticated }) => {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              value={email}
+              label="Phone Number"
+              name="phone"
+              value={phone}
               onChange={(e) => onChange(e)}
-              autoComplete="email"
               autoFocus
             />
             <TextField

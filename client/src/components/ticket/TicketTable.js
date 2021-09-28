@@ -42,7 +42,6 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          console.log("Here");
           setPageNumber((prevPageNumber) => prevPageNumber + 1);
         }
       });
@@ -51,22 +50,19 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
     [newTickets.loading, hasMore]
   );
 
-  console.log(withLink);
-
-  React.useEffect(() => {
-    setPageNumber(1);
-  }, [withLink]);
-
   React.useEffect(() => {
     tickets("NEW", pageNumber, 10);
-    if (newTickets.loading === false) {
+    if (
+      newTickets.loading === false &&
+      newTickets.tickets.tickets != null &&
+      newtickets.length !== newTickets.tickets.total
+    ) {
       newTickets.tickets.tickets.map((ticket) => {
         setTickets((prevtickets) => {
           var flag = true;
-          console.log(flag);
           if (prevtickets != null) {
             prevtickets.map((prevticket) => {
-              if (prevticket._id === ticket._id) {
+              if (prevticket.docketId === ticket.docketId) {
                 console.log(ticket);
                 flag = false;
               }
@@ -80,8 +76,6 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
         });
       });
       setHasMore((prev) => {
-        console.log(newTickets.tickets.totalPages);
-        console.log(pageNumber);
         if (newTickets.tickets.totalPages < pageNumber) {
           return false;
         } else {
@@ -89,7 +83,7 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
         }
       });
     }
-  }, [pageNumber]);
+  }, [pageNumber, newtickets]);
 
   return (
     <div>
@@ -102,10 +96,10 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
                 <StyledTableCell align="left">Subject</StyledTableCell>
                 <StyledTableCell align="left">Created by</StyledTableCell>
                 <StyledTableCell align="left">Created Date</StyledTableCell>
-                {user && user.role === "ADMIN" && (
+                {user && user.role !== "CC_OFFICER" && (
                   <StyledTableCell align="left">Assigned Date</StyledTableCell>
                 )}
-                {user && user.role === "ADMIN" && (
+                {user && user.role !== "CC_OFFICER" && (
                   <StyledTableCell align="left">Assignned To</StyledTableCell>
                 )}
                 <StyledTableCell align="left">Status</StyledTableCell>
@@ -118,13 +112,13 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
                     return (
                       <TableRow ref={lastTicketElementRef}>
                         <StyledTableCell align="left">
-                          {ticket._id}
+                          {ticket.docketId}
                         </StyledTableCell>
                         <StyledTableCell align="left">
                           {ticket.subject}
                         </StyledTableCell>
                         <StyledTableCell align="left">
-                          {ticket.creatorName}
+                          {ticket.creator.name}
                         </StyledTableCell>
                         <StyledTableCell align="left">
                           {ticket.createDate}
@@ -148,13 +142,13 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
                     return (
                       <TableRow>
                         <StyledTableCell align="left">
-                          {ticket._id}
+                          {ticket.docketId}
                         </StyledTableCell>
                         <StyledTableCell align="left">
                           {ticket.subject}
                         </StyledTableCell>
                         <StyledTableCell align="left">
-                          {ticket.creatorName}
+                          {ticket.creator.name}
                         </StyledTableCell>
                         <StyledTableCell align="left">
                           {ticket.createDate}

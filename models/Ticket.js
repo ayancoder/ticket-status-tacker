@@ -48,10 +48,6 @@ const TicketSchema = new mongoose.Schema({
     type: String
   
   }],
-   pdfFilePath: [{ 
-    type: String
-  
-  }],
   createDate: {
     type: Date,
     default: Date.now,

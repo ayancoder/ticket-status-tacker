@@ -17,8 +17,8 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["SUPER_ADMIN", "ADMIN", "TICKET_CREATOR", "TICKET_OPERATOR"],
-    default: "TICKET_OPERATOR",
+    enum: ["SUPER_ADMIN", "BDO", "CC_OFFICER", "DEALING_OFFICER"],
+    default: "DEALING_OFFICER",
   },
   designation: {
     type: String,

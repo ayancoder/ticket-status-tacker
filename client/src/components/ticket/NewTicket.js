@@ -171,13 +171,20 @@ function NewTicket({ newTickets, addtickets }) {
 
   const onFileChange = (e) => {
     let str = "";
+    var selected = [];
+    for (let i = 0; i <= selectedFile.length; i++) {
+      selectedFile.pop();
+    }
     for (let i = 0; i < e.target.files.length; i++) {
       str += e.target.files[i].name + ",";
-      var selected = selectedFile;
+      console.log(selectedFile);
+      selected = selectedFile;
       selected.push(e.target.files[i]);
       setSelectedFile(selected);
     }
     setFileName(str);
+    console.log(selectedFile);
+    console.log(e.target.files.length);
   };
 
   const onSubjectChange = (e) => {
@@ -189,10 +196,11 @@ function NewTicket({ newTickets, addtickets }) {
   };
 
   const onSubmit = (event) => {
-    console.log(selectedFile[0].fileName);
-    console.log(subject);
-    console.log(source);
-    addtickets(subject, source, selectedFile[0].fileName);
+    event.preventDefault();
+    console.log(selectedFile);
+    addtickets(subject, source, selectedFile);
+    setSubject("");
+    setSource("");
   };
 
   console.log(newTickets);
@@ -214,7 +222,11 @@ function NewTicket({ newTickets, addtickets }) {
                 </Typography>
               </Paper>
             </Grid>
-            <form className={classes.form}>
+            <form
+              className={classes.form}
+              onSubmit={onSubmit}
+              enctype="multipart/form-data"
+            >
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Container
@@ -274,7 +286,7 @@ function NewTicket({ newTickets, addtickets }) {
                           color="primary"
                           component="label"
                         >
-                          Upload
+                          To Upload
                           <input
                             type="file"
                             style={{ display: "none" }}
@@ -289,9 +301,9 @@ function NewTicket({ newTickets, addtickets }) {
                     <Grid container className={classes.submitcontainer}>
                       <Grid item xs={12} md={6} lg={12}>
                         <Button
+                          type="submit"
                           variant="outlined"
                           color="primary"
-                          onClick={onSubmit}
                           style={{ marginRight: "4rem" }}
                           disabled={!source || !subject}
                         >

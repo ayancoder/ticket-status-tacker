@@ -107,12 +107,12 @@ function Dashboard({ auth }) {
             <Grid item xs={12} md={6} lg={4}>
               <TicketCountCard ticketType="New Ticket" color="secondary" />
             </Grid>
-            {auth.user != null && auth.user.role !== "TICKET_OPERATOR" && (
+            {auth.user != null && auth.user.role !== "CC_OFFICER" && (
               <Grid item xs={12} md={6} lg={4}>
                 <TicketCountCard ticketType="Open Ticket" color="primary" />
               </Grid>
             )}
-            {auth.user != null && auth.user.role !== "TICKET_OPERATOR" && (
+            {auth.user != null && auth.user.role !== "CC_OFFICER" && (
               <Grid item xs={12} md={6} lg={4}>
                 <TicketCountCard ticketType="Closed Ticket" color="primary" />
               </Grid>
