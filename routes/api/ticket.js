@@ -31,7 +31,9 @@ router.post(
         creator: req.user.id,
         office: user.office._id,
         avatar: user.avatar,
-        filePath: req.body.filePath,
+        imageFilePath: req.body.imageFilePath,
+        pdfFilePath: req.body.pdfFilePath,
+
       });
       let ticket = await newTicket.save();
       // update user with ticket id
@@ -376,7 +378,7 @@ router.get("/count", auth, async (req, res) => {
     const userRole = req.user.role;
     console.log("userId: ", userId, ":userRole :", userRole);
 
-    if (userRole == "ADMIN") {
+    if (userRole == "BDO") {
       const adminUser = await User.findById(userId).select(
         "-password -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
       );
