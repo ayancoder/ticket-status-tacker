@@ -57,7 +57,7 @@ const upload = multer({
 }).array('image'); 
 
   
-router.post("/upload", (req, res) => {
+router.post("/upload", auth, (req, res) => {
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
