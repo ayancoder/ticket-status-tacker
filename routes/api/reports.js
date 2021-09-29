@@ -7,7 +7,7 @@ const Ticket = require("../../models/Ticket");
 
 router.post("/", auth, async (req, res) => {
     const user = await getUser(req.user.id)
-    console.log("user is :",user);
+    //console.log("user is :",user);
     const query = await queryParams(req, user.office._id);
     const options = await getQueryOptions(req);
     await Ticket.paginate(query, options)
@@ -64,14 +64,6 @@ const queryParams = async (req, officeId) => {
     return query;
   };
 
-// get office id of user.
-const getOfficeId = async (userId) => {
-    const user = await User.findById(userId).select(
-      "-password  -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
-    );
-    return user.office;
-};
-
 
 const getUser = async (userId) => {
 
@@ -88,7 +80,16 @@ const generatePfd = (tickets, user, response) => {
     orientation: "portrait",
     border: "10mm",
   };
-  const officeAddress  = user.office.address;
+  const officeAddress = user.office.address;
+  const officeName = user.office.docketPrefix
+  const fileName = new Date().toISOString() + "-" + "report.pdf"
+  const dir = "./uploads/" + officeName + "/" + getDate();
+  console.log("dir:", dir)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  const filePath = dir + "/"+ fileName;
+  console.log("file path", filePath);
   //const office = { address: "Manbazar 2, Purulia, West Bengal" };
   const str = JSON.stringify(tickets);
 
@@ -100,7 +101,7 @@ const generatePfd = (tickets, user, response) => {
       office: officeAddress,
       tickets: t,
     },
-    path: "./output.pdf",
+    path: filePath,
     type: "",
   };
 
