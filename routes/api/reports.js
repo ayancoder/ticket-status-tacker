@@ -80,19 +80,17 @@ const generatePfd = (tickets, user, response) => {
     orientation: "portrait",
     border: "10mm",
   };
-  const officeAddress = user.office.address;
-  const officeName = user.office.docketPrefix
+  
+  const officeNamePrefix = user.office.docketPrefix
   const fileName = new Date().toISOString() + "-" + "report.pdf"
-  const dir = "./uploads/" + officeName + "/" + getDate();
-  console.log("dir:", dir)
+  const dir = "./uploads/" + officeNamePrefix + "/" + getDate()+"/reports";
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
   const filePath = dir + "/"+ fileName;
   console.log("file path", filePath);
-  //const office = { address: "Manbazar 2, Purulia, West Bengal" };
+  officeAddress = { address: user.office.address };
   const str = JSON.stringify(tickets);
-
   const t = JSON.parse(str);
   console.log("tickts", t)
   const document = {
