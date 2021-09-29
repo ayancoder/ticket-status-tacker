@@ -3,7 +3,7 @@ import { setAlert } from "./alert";
 import setAuthToken from "../utils/setAuthToken";
 import { GET_POSTS, GET_POST, ADD_POST } from "./types";
 
-export const tickets = (state, page, limit, totalPage) => async (dispatch) => {
+export const tickets = (state, page, limit) => async (dispatch) => {
   try {
     console.log("Page " + page);
     if (localStorage.token) {
@@ -58,8 +58,6 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
       data,
       config
     );
-    console.log(res_upload.data.img);
-    console.log(res_upload.data.pdf);
     var pdfFilePath = res_upload.data.pdf;
     var imageFilePath = res_upload.data.img;
 
@@ -70,7 +68,7 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
         "Content-Type": "application/json",
       },
     };
-    console.log("header", config);
+    console.log("header", config_ticket);
     const NewTicket = {
       subject,
       source,

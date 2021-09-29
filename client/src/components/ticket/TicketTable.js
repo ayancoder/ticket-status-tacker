@@ -80,7 +80,6 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
       });
       setHasMore((prev) => {
         if (newTickets.tickets.totalPages < pageNumber) {
-          console.log("False retured");
           return false;
         } else {
           return true;

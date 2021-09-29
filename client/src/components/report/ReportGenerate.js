@@ -7,11 +7,11 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
 import Navbar from "../dashboard/Navbar";
-import { Button, TextField } from "@material-ui/core";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import { tickets, addtickets } from "../../actions/ticket";
 import { connect } from "react-redux";
+import { Button, TextField } from "@material-ui/core";
+import { generate_report } from "../../actions/reportGenerate";
+import { useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 function Copyright() {
   return (
@@ -150,32 +150,50 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ReportGenerate() {
+function ReportGenerate({ report_url, generate_report }) {
   const classes = useStyles();
   const [fromDate, setFromDate] = React.useState("");
   const [toDate, setToDate] = React.useState("");
+  const [clicked, setClicked] = React.useState(false);
+  const history = useHistory();
 
   const onfromDateChange = (e) => {
     setFromDate(e.target.value);
-    console.log(e.target.value);
   };
 
   const onToDateChange = (e) => {
     setToDate(e.target.value);
   };
 
-  const onSubmit = (event) => {};
+  const onSubmit = (event) => {
+    event.preventDefault();
+    console.log(fromDate);
+    console.log(toDate);
+    generate_report(
+      "ASSIGNED",
+      fromDate.substring(0, fromDate.indexOf("T")),
+      toDate.substring(0, toDate.indexOf("T"))
+    );
+    setClicked(true);
+  };
+
+  if (report_url !== null && report_url.filename != null && clicked === true) {
+    var url = report_url.filename.filename;
+    url = url.replace("/root/ticket-status-tacker", "");
+    window.open("http://143.244.131.27:5000" + url);
+    setClicked(false);
+  }
 
   return (
-    <div>
-      {/* <Navbar />
+    <div className={classes.root}>
+      <Navbar />
       <main className={classes.content}>
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             <Grid item xs={12} className={classes.heading}>
               <Paper className={classes.headingPaper}>
                 <Typography
-                  variant="h5"
+                  variant="h4"
                   align="center"
                   className={classes.ticketTypography}
                   gutterBottom
@@ -193,27 +211,38 @@ function ReportGenerate() {
                     align="center"
                   >
                     <Grid container>
-                      <Grid item xs={12} md={6} lg={4}>
+                      <Grid item xs={12} md={6} lg={6}>
                         <Typography variant="h6" className={classes.formTypo}>
                           <b>From Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
                         <TextField
-                          type="date"
+                          type="datetime-local"
                           onChange={onfromDateChange}
                           value={fromDate}
+                          variant="outlined"
                         />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.descrptioncontainer}>
                       <Grid item xs={12} md={6} lg={4}>
-                        <Typography variant="h6" className={classes.formTypo}>
+                        <Typography
+                          variant="h6"
+                          className={classes.formTypo}
+                          style={{ width: "20rem" }}
+                        >
                           <b>To Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
-                        <TextField type="date" variant="outlined" />
+                        <TextField
+                          style={{ paddingLeft: "8.8rem" }}
+                          type="datetime-local"
+                          onChange={onToDateChange}
+                          value={toDate}
+                          variant="outlined"
+                        />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.submitcontainer}>
@@ -239,20 +268,13 @@ function ReportGenerate() {
             <Copyright />
           </Box>
         </Container>
-      </main> */}
-      <TextField
-        type="date"
-        inputVariant="outlined"
-        value={fromDate}
-        onChange={onfromDateChange}
-      />
+      </main>
     </div>
   );
 }
 
-// const mapStateToProps = (state) => ({
-//   user: state.auth.user,
-//   newTickets: state,
-// });
+const mapStateToProps = (state) => ({
+  report_url: state.generate,
+});
 
-export default ReportGenerate;
+export default connect(mapStateToProps, { generate_report })(ReportGenerate);
