@@ -152,7 +152,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewTicket({ newTickets, addtickets }) {
+function NewTicket({ addtickets }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
   const [selectedFile, setSelectedFile] = React.useState([]);
@@ -201,9 +201,8 @@ function NewTicket({ newTickets, addtickets }) {
     addtickets(subject, source, selectedFile);
     setSubject("");
     setSource("");
+    setFileName("");
   };
-
-  console.log(newTickets);
 
   return (
     <div className={classes.root}>
@@ -244,6 +243,7 @@ function NewTicket({ newTickets, addtickets }) {
                         <TextField
                           id="standard-textarea"
                           multiline
+                          value={subject}
                           style={{ textAlign: "left", width: "20rem" }}
                           // variant="outlined"
                           onChange={onSubjectChange}
@@ -332,7 +332,6 @@ function NewTicket({ newTickets, addtickets }) {
 
 const mapStateToProps = (state) => ({
   user: state.auth.user,
-  newTickets: state,
 });
 
-export default connect(mapStateToProps, { tickets, addtickets })(NewTicket);
+export default connect(mapStateToProps, { addtickets })(NewTicket);

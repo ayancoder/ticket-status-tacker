@@ -51,7 +51,10 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
   );
 
   React.useEffect(() => {
-    tickets("NEW", pageNumber, 10);
+    tickets("NEW", pageNumber, 15);
+  }, [pageNumber]);
+
+  React.useEffect(() => {
     if (
       newTickets.loading === false &&
       newTickets.tickets.tickets != null &&
@@ -77,13 +80,14 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
       });
       setHasMore((prev) => {
         if (newTickets.tickets.totalPages < pageNumber) {
+          console.log("False retured");
           return false;
         } else {
           return true;
         }
       });
     }
-  }, [pageNumber, newtickets]);
+  }, [newTickets]);
 
   return (
     <div>
