@@ -3,6 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const cron = require('node-cron');
 const Office = require('./Office');
 const Counter = require('./TicketCounter');
+const constants = require('../const/constants');
 
 const TicketSchema = new mongoose.Schema({
   docketId: {
@@ -41,8 +42,9 @@ const TicketSchema = new mongoose.Schema({
   },
   state: {
     type: String,
-    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CONCLUDED", "DUMPPED"],
-    default: "NEW",
+    enum: [constants.NEW_STATE, constants.ASSIGNED_STATE , constants.IN_PROGRESS_STATE , constants.RESOLVED_STATE
+       ,constants.CONCLUDED_STATE , constants.DUMPPED_STATE],
+    default: constants.NEW_STATE,
   },
   imageFilePath: [{ 
     type: String
