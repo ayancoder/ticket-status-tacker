@@ -393,7 +393,7 @@ router.get("/count", auth, async (req, res) => {
       //return res.status(200).send(count);
       return ticketCount(userId, null, state, res)
 
-    } else if (userRole == constants.TICKET_CREATOR) {
+    } else if (userRole == constants.CREATOR_ROLE) {
       //const count = ticketCountOfCreator(userId);
       //return res.status(200).send(count);
       return ticketCountOfCreator(userId, res);
