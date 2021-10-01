@@ -1,47 +1,57 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const Schema = mongoose.Schema;
+const cron = require('node-cron');
+const Office = require('./Office');
+const Counter = require('./TicketCounter');
 
-const TicketSchema = new Schema({
-  creator: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
-  creatorName: {
+const TicketSchema = new mongoose.Schema({
+  docketId: {
     type: String,
+  },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
   },
   assignedTo: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  assignedToName: {
-    type: String,
-  },
-  officeId: {
+  copiedTo: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user"
+    },
+  ],
+  office: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "office"
+    ref: "office",
   },
   subject: {
     type: String,
     required: true,
   },
   description: {
-    type: String
+    type: String,
   },
   source: {
-    type: String
+    type: String,
   },
   priority: {
     type: Number,
   },
   state: {
     type: String,
-    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CLOSED", "DUMPPED"],
+    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CONCLUDED", "DUMPPED"],
     default: "NEW",
   },
-  filePath: {
-    type: String,
-  },
+  imageFilePath: [{ 
+    type: String
+  
+  }],
+   pdfFilePath: [{ 
+    type: String
+  
+  }],
   createDate: {
     type: Date,
     default: Date.now,
@@ -49,11 +59,17 @@ const TicketSchema = new Schema({
   assignDate: {
     type: Date,
   },
+  etaDate: {
+    type: Date,
+  },
   comments: [
     {
       postedBy: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "user",
+      },
+      name: {
+        type: String,
       },
       text: {
         type: String,
@@ -62,18 +78,52 @@ const TicketSchema = new Schema({
       filePath: {
         type: String,
       },
-      name: {
-        type: String,
-      },
-      avatar: {
-        type: String,
-      },
       date: {
         type: Date,
         default: Date.now,
       },
     },
-  ]
+  ],
+});
+
+TicketSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const officeId = this.office;
+    const office = await Office.findById(officeId);
+    const id = await Counter.getNextId("Tickets", officeId);
+    const event = new Date();
+    const mon = event.getMonth() + 1;
+    const day = event.getDate();
+    const year = event.getFullYear();
+    const dateStr = day + "-" + mon + "-" + year;
+    const docketId = office.docketPrefix + "/" + dateStr + "/" + id;
+    this.docketId = docketId;
+    next();
+  } else {
+    next();
+  }
+});
+
+/*
+ # ┌────────────── second (optional)
+ # │ ┌──────────── minute
+ # │ │ ┌────────── hour
+ # │ │ │ ┌──────── day of month
+ # │ │ │ │ ┌────── month
+ # │ │ │ │ │ ┌──── day of week
+ # │ │ │ │ │ │
+ # │ │ │ │ │ │
+ # * * * * * * 
+ */
+// run the corn job at 1 st jan
+cron.schedule("0 1 0 1 January *", (req, res, next) => {
+
+  Counter.find({ model: "tickets" }, function (err, counters) {
+    counters.forEach((counter) => {
+      console.log(counter);
+      Counter.counterReset("tickets", counter.identifier);
+    });
+  });
 });
 
 TicketSchema.plugin(mongoosePaginate);

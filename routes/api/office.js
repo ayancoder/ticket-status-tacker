@@ -44,11 +44,17 @@ router.get("/", async (req, res) => {
 // @route    POST api/office
 // @desc     Register a office.
 // @access   only super admi can create a office.
-router.post("/", auth, async (req, res) => {
+router.post("/", 
+check("docketPrefix", "docket prefix  is required").notEmpty(),
+auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   if (req.user.role == "SUPER_ADMIN") {
-    const { name, address, emails } = req.body;
+    const { name, docketPrefix, address, email } = req.body;
     try {
-      let office = await Office.findOne({ name });
+      let office = await Office.findOne({ email });
 
       if (office) {
         return res
@@ -57,13 +63,14 @@ router.post("/", auth, async (req, res) => {
       }
 
       office = new Office({
-        name,
-        address,
-        emails,
+        name: name,
+        docketPrefix: docketPrefix,
+        address: address,
+        email: email,
       });
 
       await office.save();
-      return res.status(200).send("office created successfully");
+      return res.status(200).send(office);
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
@@ -88,24 +95,23 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
      // destructure the request
-     const { _id, name, email, phone, role} = req.body;
+     const { _id, name, shortName, email } = req.body;
     
     // Build user object
     const userFields = {};
     //userFields._id = userId;
     if(name) userFields.name = name;
+    if(shortName) userFields.shortName = shortName;
     if(email) userFields.email = email;
-    if(phone) userFields.phone = phone;
-    if(role) userFields.role = role;
     console.log('usr field',userFields);
     try {
       // Using upsert option (creates new doc if no match is found):
-      let user = await User.findOneAndUpdate(
+      let office = await Office.findOneAndUpdate(
         { _id: _id },
         { $set: userFields },
         { new: true, setDefaultsOnInsert: true }
       );
-      return res.json(user);
+      return res.json(office);
     } catch (err) {
       console.error(err.message);
       return res.status(500).send('Server Error');

@@ -17,8 +17,8 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["SUPER_ADMIN", "ADMIN", "TICKET_CREATOR", "TICKET_OPERATOR"],
-    default: "TICKET_OPERATOR"
+    enum: ["SUPER_ADMIN", "BDO", "CC_OFFICER", "DEALING_OFFICER"],
+    default: "DEALING_OFFICER",
   },
   designation: {
     type: String,
@@ -35,20 +35,52 @@ const UserSchema = new mongoose.Schema({
   phone: {
     type: String,
   },
-  officeId: {
+  office: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "office"
+    ref: "office",
   },
-  tickets: [
+  // cc-clerk creates ticktes. 
+  createdTickets: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ticket"
-    }
+    },
+  ],
+  assignedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  inprogressTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+
+  resolvedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  concludedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
+  ],
+  copiedTickets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ticket"
+    },
   ],
   date: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 UserSchema.plugin(mongoosePaginate);
 module.exports = User = mongoose.model("user", UserSchema);
