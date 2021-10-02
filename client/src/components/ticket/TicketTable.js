@@ -60,7 +60,7 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
     if (newTickets.ticket != null) {
       console.log("Ticket Added");
       setTickets((prevtickets) => {
-        return [...prevtickets, newTickets.ticket];
+        return [newTickets.ticket, ...prevtickets];
       });
     } else if (
       newTickets.loading === false &&

@@ -152,7 +152,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewTicket({ tickets,addtickets }) {
+function NewTicket({ tickets, addtickets }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
   const [selectedFile, setSelectedFile] = React.useState([]);
@@ -334,4 +334,4 @@ const mapStateToProps = (state) => ({
   user: state.auth.user,
 });
 
-export default connect(mapStateToProps, { addtickets })(NewTicket);
+export default connect(mapStateToProps, { tickets, addtickets })(NewTicket);

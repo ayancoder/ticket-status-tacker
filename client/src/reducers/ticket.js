@@ -33,7 +33,7 @@ export default function (state = initialState, action) {
         ...state,
         ticket: payload,
         loading: false,
-        tickets: [],
+        tickets: payload,
         error: null,
       };
     default:
