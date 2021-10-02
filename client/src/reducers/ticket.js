@@ -1,3 +1,4 @@
+import { tickets } from "../actions/ticket";
 import { GET_POSTS, GET_POST, ADD_POST } from "../actions/types";
 
 const initialState = {

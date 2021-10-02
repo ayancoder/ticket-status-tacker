@@ -152,7 +152,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewTicket({ addtickets }) {
+function NewTicket({ tickets,addtickets }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
   const [selectedFile, setSelectedFile] = React.useState([]);

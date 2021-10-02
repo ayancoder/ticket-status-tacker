@@ -55,7 +55,14 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
   }, [pageNumber]);
 
   React.useEffect(() => {
-    if (
+    console.log(newTickets);
+    console.log("Entered Here");
+    if (newTickets.ticket != null) {
+      console.log("Ticket Added");
+      setTickets((prevtickets) => {
+        return [...prevtickets, newTickets.ticket];
+      });
+    } else if (
       newTickets.loading === false &&
       newTickets.tickets.tickets != null &&
       newtickets.length !== newTickets.tickets.total
@@ -87,6 +94,10 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
       });
     }
   }, [newTickets]);
+
+  React.useEffect(() => {
+    console.log("Entered");
+  }, [newTickets.tickets.ticket]);
 
   return (
     <div>
