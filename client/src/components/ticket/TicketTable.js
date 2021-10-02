@@ -95,10 +95,6 @@ function TicketsTable({ withLink, user, tickets, newTickets }) {
     }
   }, [newTickets]);
 
-  React.useEffect(() => {
-    console.log("Entered");
-  }, [newTickets.tickets.ticket]);
-
   return (
     <div>
       {newtickets.length !== 0 && (
