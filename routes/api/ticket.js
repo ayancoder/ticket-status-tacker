@@ -323,7 +323,7 @@ const getQueryOptions = (req) => {
     page: req.query.page,
     limit: req.query.limit,
     select:
-      "_id docketId subject source createDate assignDate state priority filePath",
+      "_id docketId subject source createDate assignDate state priority imageFilePath pdfFilePath",
     sort: { priority: 1, assignDate: 1 },
     populate: [creator, assignedTo],
   };
