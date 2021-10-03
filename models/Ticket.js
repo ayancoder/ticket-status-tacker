@@ -4,6 +4,7 @@ const cron = require('node-cron');
 const Office = require('./Office');
 const Counter = require('./TicketCounter');
 const constants = require('../const/constants');
+const moment = require('moment');
 
 const TicketSchema = new mongoose.Schema({
   docketId: {
@@ -93,11 +94,7 @@ TicketSchema.pre("save", async function (next) {
     const officeId = this.office;
     const office = await Office.findById(officeId);
     const id = await Counter.getNextId("Tickets", officeId);
-    const event = new Date();
-    const mon = event.getMonth() + 1;
-    const day = event.getDate();
-    const year = event.getFullYear();
-    const dateStr = day + "-" + mon + "-" + year;
+    const dateStr = moment().format('DD-MM-YYYY');
     const docketId = office.docketPrefix + "/" + dateStr + "/" + id;
     this.docketId = docketId;
     next();

@@ -5,8 +5,8 @@ const multer = require("multer");
 const User = require('../../models/User');
 const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
-//const imageConverter = require("../../converter/pdfToImg")
 const fs = require('fs');
+const moment = require('moment');
 
 const fileFilter = (req, file, callback) => {
  console.log("file -->", file)
@@ -25,7 +25,8 @@ const storage = multer.diskStorage({
 
     User.findById(userId).populate("office").then(user => {
       const officeName = user.office.docketPrefix
-      const dir = "./uploads/" + officeName + "/" + getDate();
+      const dateStr = moment().format('DD-MM-YYYY');
+      const dir = "./uploads/" + officeName + "/" + dateStr;
       console.log("dir:",dir)
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -35,18 +36,13 @@ const storage = multer.diskStorage({
     })
   },
   filename: function (req, file, callback) {
-    callback(null, new Date().toISOString() + "-" + file.originalname);
+    // remove space from file name.
+    const fileName = file.originalname.replaceAll(' ', '');
+    //add time stamp in file name
+    const fileNameWithDate = Date.now() + "-" + fileName;
+    callback(null, fileNameWithDate);
   },
 });
-
-const getDate = () => {
-  const event = new Date();
-  const mon = event.getMonth() + 1;
-  const day = event.getDate();
-  const year = event.getFullYear();
-  const dateStr = day + "-" + mon + "-" + year;
-  return dateStr;
-};
 
 const upload = multer({
   storage: storage,
