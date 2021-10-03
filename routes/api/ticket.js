@@ -7,6 +7,7 @@ const auth = require("../../middleware/auth");
 const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
 const Ticket = require("../../models/Ticket");
+const constants = require('../../const/constants');
 
 // @route    POST api/tickets
 // @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
@@ -31,7 +32,9 @@ router.post(
         creator: req.user.id,
         office: user.office._id,
         avatar: user.avatar,
-        filePath: req.body.filePath,
+        imageFilePath: req.body.imageFilePath,
+        pdfFilePath: req.body.pdfFilePath,
+
       });
       let ticket = await newTicket.save();
       // update user with ticket id
@@ -112,28 +115,28 @@ let updateTicketInUser = (
 // need to remove the ticketId form old state array
 let removeFromUser = async (ticketId, oldTicketState, userId) => {
   let user;
-  if (oldTicketState == "ASSIGNED") {
+  if (oldTicketState == constants.ASSIGNED_STATE) {
     user = await User.findOneAndUpdate(
       { _id: userId },
       { $pull: { assignedTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (oldTicketState == "IN-PROGRESS") {
+  if (oldTicketState == constants.IN_PROGRESS_STATE) {
     user = await User.findOneAndUpdate(
       { _id: userId },
       { $pull: { inprogressTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (oldTicketState == "RESOLVED") {
+  if (oldTicketState == constants.RESOLVED_STATE) {
     user = await User.findOneAndUpdate(
       { _id: userId },
       { $pull: { resolvedTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (oldTicketState == "CONCLUDED") {
+  if (oldTicketState == constants.CONCLUDED_STATE) {
     user = await User.findOneAndUpdate(
       { _id: userId },
       { $pull: { concludedTickets: ticketId } },
@@ -146,28 +149,28 @@ let removeFromUser = async (ticketId, oldTicketState, userId) => {
 // when ticket state change happens -
 //  need to add the ticketId to new state array
 let addToUser = async (ticketId, newTicketState, userId) => {
-  if (newTicketState == "ASSIGNED") {
+  if (newTicketState == constants.ASSIGNED_STATE) {
     await User.findOneAndUpdate(
       { _id: userId },
       { $push: { assignedTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (newTicketState == "IN-PROGRESS") {
+  if (newTicketState == constants.IN_PROGRESS_STATE) {
     await User.findOneAndUpdate(
       { _id: userId },
       { $push: { inprogressTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (newTicketState == "RESOLVED") {
+  if (newTicketState == constants.RESOLVED_STATE) {
     await User.findOneAndUpdate(
       { _id: userId },
       { $push: { resolvedTickets: ticketId } },
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  if (newTicketState == "CONCLUDED") {
+  if (newTicketState == constants.CONCLUDED_STATE) {
     await User.findOneAndUpdate(
       { _id: userId },
       { $push: { concludedTickets: ticketId } },
@@ -238,7 +241,7 @@ let getTicketFields = (
   const ticketFields = {};
   ticketFields.assignedTo = assigendToUserId;
   ticketFields.priority = priority;
-  ticketFields.state = "ASSIGNED";
+  ticketFields.state = constants.ASSIGNED_STATE
   ticketFields.assignDate = Date.now();
   ticketFields.comments = getNewComment(commentUser, commentText);
   return ticketFields;
@@ -320,7 +323,7 @@ const getQueryOptions = (req) => {
     page: req.query.page,
     limit: req.query.limit,
     select:
-      "_id docketId subject source createDate assignDate state priority filePath",
+      "_id docketId subject source createDate assignDate state priority imageFilePath pdfFilePath",
     sort: { priority: 1, assignDate: 1 },
     populate: [creator, assignedTo],
   };
@@ -376,7 +379,7 @@ router.get("/count", auth, async (req, res) => {
     const userRole = req.user.role;
     console.log("userId: ", userId, ":userRole :", userRole);
 
-    if (userRole == "ADMIN") {
+    if (userRole == constants.ADMIN_ROLE) {
       const adminUser = await User.findById(userId).select(
         "-password -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
       );
@@ -385,12 +388,12 @@ router.get("/count", auth, async (req, res) => {
       //return res.status(200).send(count);
       return ticketCount(null, officeId, state, res)
 
-    } else if (userRole == "TICKET_OPERATOR") {
+    } else if (userRole == constants.OPERATOR_ROLE) {
       //const count = ticketCountOfOperator(userId, state);
       //return res.status(200).send(count);
       return ticketCount(userId, null, state, res)
 
-    } else if (userRole == "TICKET_CREATOR") {
+    } else if (userRole == constants.CREATOR_ROLE) {
       //const count = ticketCountOfCreator(userId);
       //return res.status(200).send(count);
       return ticketCountOfCreator(userId, res);
@@ -407,7 +410,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
     // get count of new/assigned/in-progress/resolved/closed
     //state, priority, assignedTo, createdBy, officeId, countText
     const newTicket = ticketCountQueryString(
-      "NEW",
+      constants.NEW_STATE,
       null,
       assigedTo,
       null,
@@ -416,7 +419,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
     );
     //console.log('new ticket count query', newTicket);
     const assignedTicket = ticketCountQueryString(
-      "ASSIGNED",
+      constants.ASSIGNED_STATE,
       null,
       assigedTo,
       null,
@@ -425,7 +428,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
     );
     //console.log('assigned query', assignedTicket);
     const inprogressTicket = ticketCountQueryString(
-      "IN-PROGRESS",
+      constants.IN_PROGRESS_STATE,
       null,
       assigedTo,
       null,
@@ -434,7 +437,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
     );
     //console.log("inprogress query ", inprogressTicket)
     const resolvedTicket = ticketCountQueryString(
-      "RESOLVED",
+      constants.RESOLVED_STATE,
       null,
       assigedTo,
       null,
@@ -486,7 +489,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       assigedTo,
       null,
       officeId,
-      "high"
+      constants.TICKET_PRIORITY_HIGH
     );
     //console.log('new ticket count query', newTicket);
     const medPriority = ticketCountQueryString(
@@ -495,7 +498,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       assigedTo,
       null,
       officeId,
-      "med"
+      constants.TICKET_PRIORITY_MED
     );
     //console.log('assigned query', assignedTicket);
     const lowPriority = ticketCountQueryString(
@@ -504,7 +507,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       assigedTo,
       null,
       officeId,
-      "low"
+      constants.TICKET_PRIORITY_LOW
     );
     //console.log("inprogress query ", inprogressTicket)
     Ticket.aggregate(

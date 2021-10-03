@@ -3,6 +3,8 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const cron = require('node-cron');
 const Office = require('./Office');
 const Counter = require('./TicketCounter');
+const constants = require('../const/constants');
+const moment = require('moment');
 
 const TicketSchema = new mongoose.Schema({
   docketId: {
@@ -41,10 +43,15 @@ const TicketSchema = new mongoose.Schema({
   },
   state: {
     type: String,
-    enum: ["NEW", "ASSIGNED", "IN-PROGRESS", "RESOLVED", "CONCLUDED", "DUMPPED"],
-    default: "NEW",
+    enum: [constants.NEW_STATE, constants.ASSIGNED_STATE , constants.IN_PROGRESS_STATE , constants.RESOLVED_STATE
+       ,constants.CONCLUDED_STATE , constants.DUMPPED_STATE],
+    default: constants.NEW_STATE,
   },
   imageFilePath: [{ 
+    type: String
+  
+  }],
+   pdfFilePath: [{ 
     type: String
   
   }],
@@ -87,11 +94,7 @@ TicketSchema.pre("save", async function (next) {
     const officeId = this.office;
     const office = await Office.findById(officeId);
     const id = await Counter.getNextId("Tickets", officeId);
-    const event = new Date();
-    const mon = event.getMonth() + 1;
-    const day = event.getDate();
-    const year = event.getFullYear();
-    const dateStr = day + "-" + mon + "-" + year;
+    const dateStr = moment().format('DD-MM-YYYY');
     const docketId = office.docketPrefix + "/" + dateStr + "/" + id;
     this.docketId = docketId;
     next();

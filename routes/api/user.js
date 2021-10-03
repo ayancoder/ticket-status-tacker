@@ -9,7 +9,7 @@ const { check, validationResult } = require("express-validator");
 const normalize = require("normalize-url");
 const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
-//const Office = require("../../models/Office");
+const constants = require('../../const/constants');
 
 // @route    GET api/user/me
 // @desc     Get current users. token is passed in header. user id fetched from token
@@ -53,10 +53,10 @@ router.get(
 router.get("/", auth, async (req, res) => {
   try {
     console.log("get all user");
-    if (req.user.role === "SUPER_ADMIN") {
+    if (req.user.role === constants.SUPER_ADMIN_ROLE) {
       const users = await User.find();
       res.json(users);
-    } else if (req.user.role === "BDO") {
+    } else if (req.user.role === constants.ADMIN_ROLE) {
       const adminUserId = req.user.id;
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
