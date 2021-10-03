@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, callback) {
     // remove space from file name.
-    const fileName = file.originalname.replaceAll(' ', '');
+    const fileName = file.originalname.replace(/ /g, '');
     //add time stamp in file name
     const fileNameWithDate = Date.now() + "-" + fileName;
     callback(null, fileNameWithDate);
