@@ -13,15 +13,18 @@ const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
 const constants = require('../../const/constants');
 
-// @route    GET api/user/me
-// @desc     Get current users. token is passed in header. user id fetched from token
+// @route    GET api/user/details
+// @desc     get user details for given user id. only SUPER_ADMIN can execute it.
 // @access   Private
-router.get("/me", auth, async (req, res) => {
+router.get("/details", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(400).json({ msg: "no user found" });
-    }
+    if (req.user.role === constants.SUPER_ADMIN_ROLE) {
+      const user = await User.findById(req.body.userId).select("name phone email password role");
+      res.json(user);
+    } else
+      if (!user) {
+        return res.status(400).json({ msg: "no user found" });
+      }
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -63,7 +66,6 @@ router.get("/", auth, async (req, res) => {
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
       );
-      console.log("get user :", adminUser);
       const officeId = ObjectId(adminUser.office);
       const query = {
         office: officeId,
