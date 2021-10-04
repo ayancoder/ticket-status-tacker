@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const gravatar = require("gravatar");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -61,9 +63,11 @@ router.get("/", auth, async (req, res) => {
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
       );
+      const officeId = ObjectId(adminUser.officeId);
       const query = {
-        office: adminUser.officeId,
+        office: officeId,
       };
+      console.log("get user query ", query);
       const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {
