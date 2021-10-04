@@ -62,9 +62,9 @@ router.get("/", auth, async (req, res) => {
         "-password -tickets"
       );
       const query = {
-        officeId: adminUser.officeId,
+        office: adminUser.officeId,
       };
-      const users = await User.find(query);
+      const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {
       return res.status(400).json({ msg: "only BDO can view all users." });
