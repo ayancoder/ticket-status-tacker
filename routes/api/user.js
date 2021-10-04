@@ -63,7 +63,8 @@ router.get("/", auth, async (req, res) => {
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
       );
-      const officeId = ObjectId(adminUser.officeId);
+      console.log("get user :", adminUser);
+      const officeId = ObjectId(adminUser.office);
       const query = {
         office: officeId,
       };
