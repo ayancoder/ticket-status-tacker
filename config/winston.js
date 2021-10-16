@@ -1,5 +1,6 @@
 var appRoot = require('app-root-path');
-var winston = require('winston');
+const winston = require('winston')
+const path = require('path')
 
 
 // Define your severity levels. 

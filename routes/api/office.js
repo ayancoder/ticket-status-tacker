@@ -71,12 +71,14 @@ auth, async (req, res) => {
       });
 
       await office.save();
+      logger.info(`office created ${office}`);
       return res.status(200).send(office);
     } catch (err) {
       logger.error(err.message);
       res.status(500).send("Server error");
     }
   } else {
+    logger.error(`office creation failed.only super admin can create office`);
     return res
       .status(400)
       .json({ msg: "only super admin can create a office." });
@@ -104,7 +106,7 @@ router.put(
     if(name) userFields.name = name;
     if(shortName) userFields.shortName = shortName;
     if(email) userFields.email = email;
-    console.log('usr field',userFields);
+    logger.info(`usr field ${JSON.stringify(userFields)}`);
     try {
       // Using upsert option (creates new doc if no match is found):
       let office = await Office.findOneAndUpdate(
@@ -114,7 +116,7 @@ router.put(
       );
       return res.json(office);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).send('Server Error');
     }
   }

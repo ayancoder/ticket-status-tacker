@@ -15,7 +15,7 @@ router.post("/", auth, async (req, res) => {
         generatePfd(data.docs, user, res)    
     })
     .catch((err) => {
-      logger.log("error in fetching data", err);
+      logger.info("error in fetching data", err);
       return res.status(500).send("Server Error");
     }); 
     
@@ -59,7 +59,7 @@ const queryParams = async (req, officeId) => {
     if (docketId) query.docketId = docketId;
     if (priority) query.priority = priority;
     if (startDate) query.createDate = { $gte: startDate, $lte: endDate };
-    logger.log("query params", query)
+    logger.info(`query params ${query}`)
     return query;
   };
 
@@ -87,11 +87,11 @@ const generatePfd = (tickets, user, response) => {
     fs.mkdirSync(dir, { recursive: true });
   }
   const filePath = dir + "/"+ fileName;
-  logger.log("file path", filePath);
+  logger.info(`file path ${filePath}`);
   officeAddress = { address: user.office.address };
   const str = JSON.stringify(tickets);
   const t = JSON.parse(str);
-  logger.log("tickts", t)
+  logger.info(`tickts ${t}`)
   const document = {
     html: html,
     data: {
@@ -107,7 +107,7 @@ const generatePfd = (tickets, user, response) => {
         return response.status(200).send(res)
     })
     .catch((error) => {
-      logger.error(error);
+      logger.error(error.message);
     });
     
 };

@@ -24,7 +24,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      logger.log("user creating tickets:", req.user);
+      logger.info(`user creating tickets: ${JSON.stringify(req.user)}`);
       const user = await User.findById(req.user.id).populate("office");
 
       const newTicket = new Ticket({
@@ -47,13 +47,13 @@ router.post(
       const creator = { path: "creator", select: "name" };
       Ticket.populate(ticket, creator, function (err, data) {
         if(err) {
-          console.log("could not save ticket", err);
+          logger.error(`could not save ticket ${JSON.stringify(err.message)}`);
         }
         return res.json(ticket);
       }); 
       
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       res.status(500).send("Server Error");
     }
   }
@@ -94,7 +94,7 @@ router.put(
         return res.status(400).json({ msg: "ticket not found" });
       }
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).send("Server Error");
     }
   }
@@ -144,7 +144,7 @@ let removeFromUser = async (ticketId, oldTicketState, userId) => {
       { new: true, setDefaultsOnInsert: true }
     );
   }
-  //console.log("updated user ", user);
+  //logger.log("updated user ", user);
 };
 
 // when ticket state change happens -
@@ -206,7 +206,7 @@ router.put(
         commentUser,
         commentText
       );
-      console.log("ticket fields:", ticketFields);
+      logger.info(`ticket fields: ${JSON.stringify(ticketFields)}`);
       // udpate the ticket.
       let ticket = await Ticket.findOneAndUpdate(
         { _id: ticketId },
@@ -226,7 +226,7 @@ router.put(
         return res.status(400).json({ msg: "ticket not found" });
       }
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).send("Server Error");
     }
   }
@@ -262,7 +262,7 @@ let getNewComment = (commentUser, commentText) => {
 // @access   Private
 router.get("/", auth, async (req, res) => {
   const query = await queryParams(req);
-  console.log("query-->", query);
+  logger.info(`query  ${JSON.stringify(query)}`);
   const options = getQueryOptions(req);
 
   await Ticket.paginate(query, options)
@@ -275,7 +275,7 @@ router.get("/", auth, async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("error in fetching data", err);
+      logger.error(`error in fetching data ${err.message}`);
       return res.status(500).send("Server Error");
     });
 });
@@ -336,7 +336,7 @@ const getQueryOptions = (req) => {
 router.get("/search", auth, async (req, res) => {
 
   const query = await queryParams(req);
-  console.log("query-->", query);
+  logger.info(`query  ${JSON.stringify(query)}`);
   const options = getQueryOptions(req);
 
   await Ticket.paginate(query, options)
@@ -349,7 +349,7 @@ router.get("/search", auth, async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("error in fetching data", err);
+      logger.error(`error in fetching data ${err.message}`);
       return res.status(500).send("Server Error");
     });
 });
@@ -368,7 +368,7 @@ router.get("/ticket_id/:ticket_id", auth, async (req, res) => {
     }
     return res.json(ticket);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     return res.status(500).send("Server Error");
   }
 });
@@ -378,7 +378,7 @@ router.get("/count", auth, async (req, res) => {
     const state = req.query.state;
     const userId = ObjectId(req.user.id);
     const userRole = req.user.role;
-    console.log("userId: ", userId, ":userRole :", userRole);
+    logger.info(`userId:  ${userId} userRole: ${userRole}`);
 
     if (userRole == constants.ADMIN_ROLE) {
       const adminUser = await User.findById(userId).select(
@@ -400,7 +400,7 @@ router.get("/count", auth, async (req, res) => {
       return ticketCountOfCreator(userId, res);
     }
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     return res.status(500).send("Server Error");
   }
 });
@@ -418,7 +418,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       "newTicket"
     );
-    //console.log('new ticket count query', newTicket);
+    //logger.log('new ticket count query', newTicket);
     const assignedTicket = ticketCountQueryString(
       constants.ASSIGNED_STATE,
       null,
@@ -427,7 +427,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       "assignedTicket"
     );
-    //console.log('assigned query', assignedTicket);
+    //logger.log('assigned query', assignedTicket);
     const inprogressTicket = ticketCountQueryString(
       constants.IN_PROGRESS_STATE,
       null,
@@ -436,7 +436,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       "inprogressTicket"
     );
-    //console.log("inprogress query ", inprogressTicket)
+    //logger.log("inprogress query ", inprogressTicket)
     const resolvedTicket = ticketCountQueryString(
       constants.RESOLVED_STATE,
       null,
@@ -445,7 +445,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       "resolvedTicket"
     );
-    //console.log("resolved query", resolvedTicket);
+    //logger.log("resolved query", resolvedTicket);
     Ticket.aggregate(
       [
         {
@@ -475,10 +475,10 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       ],
       function (err, counts) {
         if (err) {
-          //console.error(err.message);
+          //logger.error(err.message);
           return res.status(500).send("Server Error");
         }
-        console.log("admin -->", counts[0]);
+        //logger.info(`admin  ${counts[0]}`);
         return res.status(200).send(counts[0]);
       }
     );
@@ -492,7 +492,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       constants.TICKET_PRIORITY_HIGH
     );
-    //console.log('new ticket count query', newTicket);
+    //logger.log('new ticket count query', newTicket);
     const medPriority = ticketCountQueryString(
       state,
       2,
@@ -501,7 +501,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       constants.TICKET_PRIORITY_MED
     );
-    //console.log('assigned query', assignedTicket);
+    //logger.log('assigned query', assignedTicket);
     const lowPriority = ticketCountQueryString(
       state,
       3,
@@ -510,7 +510,7 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       officeId,
       constants.TICKET_PRIORITY_LOW
     );
-    //console.log("inprogress query ", inprogressTicket)
+    //logger.log("inprogress query ", inprogressTicket)
     Ticket.aggregate(
       [
         {
@@ -536,10 +536,10 @@ const ticketCount = (assigedTo, officeId, state, res) => {
       ],
       function (err, counts) {
         if (err) {
-          console.error(err.message);
+          logger.error(err.message);
           return res.status(500).send("Server Error");
         }
-        console.log("admin tickets ", counts[0]);
+        //logger.log("admin tickets ", counts[0]);
         return res.status(200).send(counts[0]);
       }
     );
@@ -572,10 +572,10 @@ const ticketCountOfCreator = (createdBy, res) => {
     ],
     function (err, counts) {
       if (err) {
-        console.error(err.message);
+        logger.error(err.message);
         return res.status(500).send("Server Error");
       }
-      console.log(" --> ", counts[0]);
+      //logger.log(" --> ", counts[0]);
       return res.status(200).send(counts[0]);
       //return counts[0];
     }
@@ -621,7 +621,7 @@ const ticketCountQueryString = (
     andQueryArray.push(officeQuery);
   }
   const countQuery = { $count: countText };
-  console.log("query ->", JSON.stringify(andQueryArray));
+  //logger.log(`query  ${JSON.stringify(andQueryArray)}`);
   const query = [
     {
       $match: {
@@ -654,8 +654,7 @@ router.delete("/:id", [auth, checkObjectId("id")], async (req, res) => {
 
     res.json({ msg: "ticket removed" });
   } catch (err) {
-    console.error(err.message);
-
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -685,12 +684,12 @@ router.post("/comment/:id", auth, checkObjectId("id"), async (req, res) => {
     if (priority) ticket.priority = priority;
 
     ticket.comments.unshift(newComment);
-    console.log("after update ticket", ticket);
+    //logger.info(`after update ticket ${JSON.stringify(ticket)}`);
     await ticket.save();
 
     res.json(ticket);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -723,7 +722,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
 
     return res.json(ticket.comments);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     return res.status(500).send("Server Error");
   }
 });

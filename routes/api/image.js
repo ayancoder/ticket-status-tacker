@@ -10,7 +10,7 @@ const moment = require('moment');
 const logger = require('../../config/winston');
 
 const fileFilter = (req, file, callback) => {
- console.log("file -->", file)
+  logger.info(`file :${file}`)
   if(file.mimetype === 'image/jpeg' || 
     file.mimetype === 'image/png'||
     file.mimetype == 'application/pdf'){
@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
       const officeName = user.office.docketPrefix
       const dateStr = moment().format('DD-MM-YYYY');
       const dir = "./uploads/" + officeName + "/" + dateStr;
-      console.log("dir:",dir)
+      logger.info(`dir: ${dir}`)
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
@@ -59,7 +59,6 @@ router.post("/upload", auth, (req, res) => {
     if (err) {
       res.status(400).json({ message: err.message });
     } else {
-      //console.log("req", req);
       let pdfFilePath = [];
       let imgFilePath = [];
       req.files.forEach((file) => {
@@ -69,9 +68,8 @@ router.post("/upload", auth, (req, res) => {
           imgFilePath.push(file.path);
         }
       });
-      console.log("files ", pdfFilePath, imgFilePath );
-      res
-        .status(200)
+      //logger.info(`files  ${JSON.stringify(pdfFilePath)} ${JSON.stringify(imgFilePath)}`);
+      res.status(200)
         .json({
           message: "Image Uploaded Successfully !",
           pdf: pdfFilePath,

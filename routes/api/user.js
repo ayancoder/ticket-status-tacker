@@ -58,7 +58,7 @@ router.get(
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
-    logger.log("get all user");
+    logger.info("get all user");
     if (req.user.role === constants.SUPER_ADMIN_ROLE) {
       const users = await User.find();
       res.json(users);
@@ -71,7 +71,7 @@ router.get("/", auth, async (req, res) => {
       const query = {
         office: officeId,
       };
-      logger.log("get user query ", query);
+      logger.info(`get user query  ${query}`);
       const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {
@@ -101,8 +101,8 @@ router.post(
     }
 
     const { name, email, password, phone, officeId } = req.body;
-    logger.info(`user created name:${name}, email:${email}, password:${password},
-     phone:${phone}, officeId:${officeId}`);
+    logger.info(`user data name:${name}, email:${email}, phone:${phone} ,password:${password},
+      officeId:${officeId}`);
     try {
       let user = await User.findOne({ phone });
 
@@ -159,6 +159,8 @@ router.post(
           { new: true, setDefaultsOnInsert: true }
         );
       }
+      logger.info(`user created ${user}`);
+
     } catch (err) {
       logger.error(err.message);
       res.status(500).send("Server error");
@@ -180,16 +182,19 @@ router.put(
     }
     // destructure the request
     const { _id, name, email, phone, role, officeId } = req.body;
+    logger.info(`updating user id:${_id}, name:${name}, 
+                 email:${email}, phone:${phone}, 
+                 role:${role}, officeId:${officeId}`);
 
     // Build user object
-    const userFields = {};
+    var userFields = {};
     if (name) userFields.name = name;
     if (email) userFields.email = email;
     if (phone) userFields.phone = phone;
     if (role) userFields.role = role;
     if (officeId) userFields.office = officeId;
 
-    logger.log("usr field", userFields);
+    logger.info(`usr field ${JSON.stringify(userFields)}`);
     try {
       let user = await User.findOneAndUpdate(
         { _id: _id },
@@ -214,11 +219,11 @@ router.put(
  router.delete('/:user_id', auth, async (req, res) => {
   try {
     const userId = req.params.user_id;
-    logger.log("user id", userId);
+    logger.info(`user id ${JOSN.stringify(userId)}`);
     let user = await User.findOneAndRemove({ _id: userId });
     if (user) {
       const officeId = user.office;
-      logger.log("office id:", officeId);
+      logger.info(`office id: ${JSON.stringify(officeId)}`);
 
       await Office.findOneAndUpdate(
         { _id: officeId },
