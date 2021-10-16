@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const constants = require('../const/constants');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -18,8 +17,8 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: [constants.SUPER_ADMIN_ROLE, constants.ADMIN_ROLE, constants.OPERATOR_ROLE, constants.CREATOR_ROLE],
-    default: constants.OPERATOR_ROLE,
+    enum: ["SUPER_ADMIN", "BDO", "CC_OFFICER", "DEALING_OFFICER"],
+    default: "DEALING_OFFICER",
   },
   designation: {
     type: String,
