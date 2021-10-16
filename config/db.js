@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const config = require("config");
 const dbURI = config.get("mongoURI");
+const logger = require('./winston');
 
 const connectDB = async () => {
   try {
@@ -10,7 +11,7 @@ const connectDB = async () => {
       useCreateIndex: true,
       useFindAndModify: false,
     });
-    console.log("mongo db connected");
+    logger.info("mongo db connected");
   } catch (err) {
     console.error(err.mssage);
     // exit process with failure.

@@ -4,19 +4,18 @@ var pdf = require("pdf-creator-node")
 var fs = require('fs') 
 const auth = require("../../middleware/auth");
 const Ticket = require("../../models/Ticket");
+const logger = require('../../config/winston');
 
 router.post("/", auth, async (req, res) => {
     const user = await getUser(req.user.id)
-    //console.log("user is :",user);
     const query = await queryParams(req, user.office._id);
     const options = await getQueryOptions(req);
     await Ticket.paginate(query, options)
     .then((data) => {   
-        //console.log("data", data)   
         generatePfd(data.docs, user, res)    
     })
     .catch((err) => {
-      console.log("error in fetching data", err);
+      logger.log("error in fetching data", err);
       return res.status(500).send("Server Error");
     }); 
     
@@ -60,7 +59,7 @@ const queryParams = async (req, officeId) => {
     if (docketId) query.docketId = docketId;
     if (priority) query.priority = priority;
     if (startDate) query.createDate = { $gte: startDate, $lte: endDate };
-    console.log("query params", query)
+    logger.log("query params", query)
     return query;
   };
 
@@ -88,11 +87,11 @@ const generatePfd = (tickets, user, response) => {
     fs.mkdirSync(dir, { recursive: true });
   }
   const filePath = dir + "/"+ fileName;
-  console.log("file path", filePath);
+  logger.log("file path", filePath);
   officeAddress = { address: user.office.address };
   const str = JSON.stringify(tickets);
   const t = JSON.parse(str);
-  console.log("tickts", t)
+  logger.log("tickts", t)
   const document = {
     html: html,
     data: {
@@ -108,7 +107,7 @@ const generatePfd = (tickets, user, response) => {
         return response.status(200).send(res)
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(error);
     });
     
 };

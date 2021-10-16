@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const checkObjectId = require('../../middleware/checkObjectId');
 const User = require('../../models/User');
 const Office = require('../../models/Office')
+const logger = require('../../config/winston');
 
 // @route    GET api/office/:office_id
 // @desc     Get office by office ID.
@@ -20,7 +21,7 @@ router.get(
 
       return res.json(office);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).json({ msg: "Server error" });
     }
   }
@@ -35,7 +36,7 @@ router.get("/", async (req, res) => {
       const offices = await Office.find();
       res.json(offices);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -72,7 +73,7 @@ auth, async (req, res) => {
       await office.save();
       return res.status(200).send(office);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       res.status(500).send("Server error");
     }
   } else {

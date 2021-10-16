@@ -7,6 +7,7 @@ const Office = require('../../models/Office')
 const auth = require("../../middleware/auth");
 const fs = require('fs');
 const moment = require('moment');
+const logger = require('../../config/winston');
 
 const fileFilter = (req, file, callback) => {
  console.log("file -->", file)

@@ -12,6 +12,7 @@ const normalize = require("normalize-url");
 const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
 const constants = require('../../const/constants');
+const logger = require('../../config/winston');
 
 // @route    GET api/user/details
 // @desc     get user details for given user id. only SUPER_ADMIN can execute it.
@@ -27,7 +28,7 @@ router.get("/details", auth, async (req, res) => {
       }
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -46,7 +47,7 @@ router.get(
 
       return res.json(user);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).json({ msg: "Server error" });
     }
   }
@@ -57,7 +58,7 @@ router.get(
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
-    console.log("get all user");
+    logger.log("get all user");
     if (req.user.role === constants.SUPER_ADMIN_ROLE) {
       const users = await User.find();
       res.json(users);
@@ -70,14 +71,14 @@ router.get("/", auth, async (req, res) => {
       const query = {
         office: officeId,
       };
-      console.log("get user query ", query);
+      logger.log("get user query ", query);
       const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {
       return res.status(400).json({ msg: "only BDO can view all users." });
     }
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -100,7 +101,8 @@ router.post(
     }
 
     const { name, email, password, phone, officeId } = req.body;
-
+    logger.info(`user created name:${name}, email:${email}, password:${password},
+     phone:${phone}, officeId:${officeId}`);
     try {
       let user = await User.findOne({ phone });
 
@@ -158,7 +160,7 @@ router.post(
         );
       }
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       res.status(500).send("Server error");
     }
   }
@@ -187,7 +189,7 @@ router.put(
     if (role) userFields.role = role;
     if (officeId) userFields.office = officeId;
 
-    console.log("usr field", userFields);
+    logger.log("usr field", userFields);
     try {
       let user = await User.findOneAndUpdate(
         { _id: _id },
@@ -203,7 +205,7 @@ router.put(
 
       return res.json(user);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).send("Server Error");
     }
   }
@@ -212,11 +214,11 @@ router.put(
  router.delete('/:user_id', auth, async (req, res) => {
   try {
     const userId = req.params.user_id;
-    console.log("user id", userId);
+    logger.log("user id", userId);
     let user = await User.findOneAndRemove({ _id: userId });
     if (user) {
       const officeId = user.office;
-      console.log("office id:", officeId);
+      logger.log("office id:", officeId);
 
       await Office.findOneAndUpdate(
         { _id: officeId },
@@ -226,7 +228,7 @@ router.put(
     }
     res.json({ msg: "User deleted" });
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 }); 

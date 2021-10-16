@@ -8,6 +8,7 @@ const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
 const Ticket = require("../../models/Ticket");
 const constants = require('../../const/constants');
+const logger = require('../../config/winston');
 
 // @route    POST api/tickets
 // @desc     Create a ticket subject and source passed in body. creatorid be fetched from token.
@@ -23,7 +24,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      console.log("user creating tickets:", req.user);
+      logger.log("user creating tickets:", req.user);
       const user = await User.findById(req.user.id).populate("office");
 
       const newTicket = new Ticket({

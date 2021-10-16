@@ -20,6 +20,7 @@
     "@material-ui/pickers": "^3.3.10",
     "@mui/lab": "^5.0.0-alpha.47",
     "@mui/material": "^5.0.0",
+    "app-root-path": "^3.0.0",
     "axios": "^0.21.0",
     "bcryptjs": "^2.4.3",
     "client": "file:client",
@@ -32,10 +33,12 @@
     "moment": "^2.29.1",
     "mongoose": "^5.11.8",
     "mongoose-paginate-v2": "^1.4.1",
+    "morgan": "^1.10.0",
     "multer": "^1.4.3",
     "node-cron": "^3.0.0",
     "normalize-url": "^5.3.0",
-    "pdf-creator-node": "^2.2.4"
+    "pdf-creator-node": "^2.2.4",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
