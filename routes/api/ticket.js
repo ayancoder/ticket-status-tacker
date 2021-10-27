@@ -669,30 +669,19 @@ router.post("/comment/:id", auth, checkObjectId("id"), async (req, res) => {
   }
 
   try {
-    logger.info("commeting 672");
     const user = await User.findById(req.user.id).select("-password");
     const ticket = await Ticket.findById(req.params.id);
-    logger.info("commeting 675");
     const newComment = getNewComment(user,req.body.commentText);
-    // {
-    //   text: req.body.commentText,
-    //   name: user.name,
-    //   avatar: user.avatar,
-    //   user: req.user.id,
-    // };
-    logger.info(`commeting 682 ${JSON.stringify(newComment)}`);
     const state = req.body.state;
     const priority = req.body.priority;
     if (state) ticket.state = state;
     if (priority) ticket.priority = priority;
-    logger.info("commeting 687");
     ticket.comments.unshift(newComment);
     logger.info(`after update ticket ${JSON.stringify(ticket)}`);
     await ticket.save();
-    logger.info("commeting 691");
     res.json(ticket);
   } catch (err) {
-    logger.error(err.message);
+    logger.error(`${JSON.stringify(err)}`);
     res.status(500).send("Server Error");
   }
 });

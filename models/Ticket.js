@@ -76,7 +76,6 @@ const TicketSchema = new mongoose.Schema({
       },
       text: {
         type: String,
-        required: true,
       },
       filePath: {
         type: String,
