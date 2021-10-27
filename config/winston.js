@@ -49,6 +49,7 @@ const levels = {
     winston.format.printf(
       (info) => `${info.timestamp} ${info.level}: ${info.message}`,
     ),
+    //winston.format.json()
   )
   
   // Define which transports the logger must use to print out messages. 
