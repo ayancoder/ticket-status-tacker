@@ -44,7 +44,7 @@ const TicketSchema = new mongoose.Schema({
   state: {
     type: String,
     enum: [constants.NEW_STATE, constants.ASSIGNED_STATE , constants.IN_PROGRESS_STATE , constants.RESOLVED_STATE
-       ,constants.CONCLUDED_STATE , constants.DUMPPED_STATE],
+       ,constants.CONCLUDED_STATE , constants.DUMPPED_STATE, constants.CLOSED_STATE],
     default: constants.NEW_STATE,
   },
   imageFilePath: [{ 
