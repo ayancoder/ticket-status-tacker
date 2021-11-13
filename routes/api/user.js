@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const gravatar = require("gravatar");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -9,19 +11,24 @@ const { check, validationResult } = require("express-validator");
 const normalize = require("normalize-url");
 const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
+const constants = require('../../const/constants');
+const logger = require('../../config/winston');
 
-// @route    GET api/user/me
-// @desc     Get current users. token is passed in header. user id fetched from token
+// @route    GET api/user/details
+// @desc     get user details for given user id. only SUPER_ADMIN can execute it.
 // @access   Private
-router.get("/me", auth, async (req, res) => {
+router.get("/details", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(400).json({ msg: "no user found" });
-    }
+    if (req.user.role === constants.SUPER_ADMIN_ROLE) {
+      const user = await User.findById(req.body.userId).select("name phone email password role");
+      res.json(user);
+    } else
+      if (!user) {
+        return res.status(400).json({ msg: "no user found" });
+      }
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -40,7 +47,7 @@ router.get(
 
       return res.json(user);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).json({ msg: "Server error" });
     }
   }
@@ -51,25 +58,27 @@ router.get(
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
-    console.log("get all user");
-    if (req.user.role === "SUPER_ADMIN") {
+    logger.info("get all user");
+    if (req.user.role === constants.SUPER_ADMIN_ROLE) {
       const users = await User.find();
       res.json(users);
-    } else if (req.user.role === "ADMIN") {
+    } else if (req.user.role === constants.ADMIN_ROLE) {
       const adminUserId = req.user.id;
       const adminUser = await User.findById(adminUserId).select(
         "-password -tickets"
       );
+      const officeId = ObjectId(adminUser.office);
       const query = {
-        officeId: adminUser.officeId,
+        office: officeId,
       };
-      const users = await User.find(query);
+      logger.info(`get user query  ${query}`);
+      const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {
-      return res.status(400).json({ msg: "only admin can view all users." });
+      return res.status(400).json({ msg: "only BDO can view all users." });
     }
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send("Server Error");
   }
 });
@@ -80,7 +89,7 @@ router.get("/", auth, async (req, res) => {
 router.post(
   "/",
   check("name", "Name is required").notEmpty(),
-  check("email", "Please include a valid email").isEmail(),
+  check("phone", "Mobile no. is required").notEmpty(),
   check(
     "password",
     "Please enter a password with 6 or more characters"
@@ -92,9 +101,10 @@ router.post(
     }
 
     const { name, email, password, phone, officeId } = req.body;
-
+    logger.info(`user data name:${name}, email:${email}, phone:${phone} ,password:${password},
+      officeId:${officeId}`);
     try {
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ phone });
 
       if (user) {
         return res
@@ -112,12 +122,11 @@ router.post(
       );
 
       user = new User({
-        name,
-        email,
-        avatar,
-        password,
-        phone,
-        officeId,
+        name: name,
+        email: email,
+        avatar: avatar,
+        phone: phone,
+        office: officeId,
       });
 
       const salt = await bcrypt.genSalt(10);
@@ -142,8 +151,18 @@ router.post(
           res.json({ token });
         }
       );
+      // add the use to office staff.
+      if (officeId) {
+        let office = await Office.findOneAndUpdate(
+          { _id: officeId },
+          { $push: { staffs: user._id } },
+          { new: true, setDefaultsOnInsert: true }
+        );
+      }
+      logger.info(`user created ${user}`);
+
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       res.status(500).send("Server error");
     }
   }
@@ -163,51 +182,59 @@ router.put(
     }
     // destructure the request
     const { _id, name, email, phone, role, officeId } = req.body;
-    /* if (req.user.role === "ADMIN") {
-      // if admin executing. then use body's user id
-      userId = _id;
-    }
-    else {
-       // if user executing. then use id as token's id
-       userId = req.user.id;
-    } */
+    logger.info(`updating user id:${_id}, name:${name}, 
+                 email:${email}, phone:${phone}, 
+                 role:${role}, officeId:${officeId}`);
+
     // Build user object
-    const userFields = {};
-    //userFields._id = userId;
+    var userFields = {};
     if (name) userFields.name = name;
     if (email) userFields.email = email;
     if (phone) userFields.phone = phone;
     if (role) userFields.role = role;
-    if(officeId ) userFields.officeId = officeId;
-    console.log("usr field", userFields);
+    if (officeId) userFields.office = officeId;
+
+    logger.info(`usr field ${JSON.stringify(userFields)}`);
     try {
-      // Using upsert option (creates new doc if no match is found):
       let user = await User.findOneAndUpdate(
         { _id: _id },
         { $set: userFields },
         { new: true, setDefaultsOnInsert: true }
       );
+      // add the use to office staff.
+      let office = await Office.findOneAndUpdate(
+        { _id: officeId },
+        { $push: { staffs: user._id } },
+        { new: true, setDefaultsOnInsert: true }
+      );
+
       return res.json(user);
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       return res.status(500).send("Server Error");
     }
   }
 );
 
- router.delete('/', auth, async (req, res) => {
+ router.delete('/:user_id', auth, async (req, res) => {
   try {
-    // Remove user posts
-    // Remove profile
-    // Remove user
-    await Promise.all([
-      User.findOneAndRemove({ _id: req.user.id })
-    ]);
+    const userId = req.params.user_id;
+    logger.info(`user id ${JOSN.stringify(userId)}`);
+    let user = await User.findOneAndRemove({ _id: userId });
+    if (user) {
+      const officeId = user.office;
+      logger.info(`office id: ${JSON.stringify(officeId)}`);
 
-    res.json({ msg: 'User deleted' });
+      await Office.findOneAndUpdate(
+        { _id: officeId },
+        { $pull: { staffs: user._id } },
+        { new: true, setDefaultsOnInsert: true }
+      );
+    }
+    res.json({ msg: "User deleted" });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    logger.error(err.message);
+    res.status(500).send("Server Error");
   }
 }); 
 module.exports = router;

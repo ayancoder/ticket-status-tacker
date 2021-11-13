@@ -6,6 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { useHistory } from "react-router-dom";
+import { connect } from "react-redux";
 
 const useStyles = makeStyles({
   root: {
@@ -25,7 +26,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function TicketCountCard({ ticketType, color }) {
+function TicketCountCard({ ticketType, color, ticketCount }) {
   const classes = useStyles();
   const history = useHistory();
   const newButtonHandler = (e) => {
@@ -43,7 +44,7 @@ export default function TicketCountCard({ ticketType, color }) {
       <div style={{ display: "flex" }}>
         <CardContent>
           <Typography variant="h2" component="h2" color={color}>
-            32
+            {ticketCount != null && ticketCount.tickets.total}
           </Typography>
         </CardContent>
       </div>
@@ -63,3 +64,9 @@ export default function TicketCountCard({ ticketType, color }) {
     </Card>
   );
 }
+
+const mapStateToProps = (state) => ({
+  ticketCount: state.ticket,
+});
+
+export default connect(mapStateToProps)(TicketCountCard);

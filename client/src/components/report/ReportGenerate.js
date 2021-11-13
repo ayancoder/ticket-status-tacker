@@ -6,13 +6,12 @@ import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
-import TicketsTable from "./TicketTable";
 import Navbar from "../dashboard/Navbar";
-import { Button, TextField } from "@material-ui/core";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import { tickets, addtickets } from "../../actions/ticket";
 import { connect } from "react-redux";
+import { Button, TextField } from "@material-ui/core";
+import { generate_report } from "../../actions/reportGenerate";
+import { useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 function Copyright() {
   return (
@@ -148,61 +147,42 @@ const useStyles = makeStyles((theme) => ({
   },
   submitcontainer: {
     marginTop: theme.spacing(3),
-    // marginLeft:theme.spacing(13)
   },
 }));
 
-function NewTicket({ tickets, addtickets }) {
+function ReportGenerate({ report_url, generate_report }) {
   const classes = useStyles();
-  const [isclose, setIsClose] = React.useState(0);
-  const [selectedFile, setSelectedFile] = React.useState([]);
-  const [subject, setSubject] = React.useState(null);
-  const [source, setSource] = React.useState(null);
-  const [fileName, setFileName] = React.useState(null);
+  const [fromDate, setFromDate] = React.useState("");
+  const [toDate, setToDate] = React.useState("");
+  const [clicked, setClicked] = React.useState(false);
+  const history = useHistory();
 
-  React.useEffect(() => {
-    const parsedIsClose = true;
-    setIsClose(parsedIsClose);
-  }, []);
-
-  React.useEffect(() => {
-    localStorage.setItem("isclose", isclose);
-  }, [isclose]);
-
-  const onFileChange = (e) => {
-    let str = "";
-    var selected = [];
-    for (let i = 0; i <= selectedFile.length; i++) {
-      selectedFile.pop();
-    }
-    for (let i = 0; i < e.target.files.length; i++) {
-      str += e.target.files[i].name + ",";
-      console.log(selectedFile);
-      selected = selectedFile;
-      selected.push(e.target.files[i]);
-      setSelectedFile(selected);
-    }
-    setFileName(str);
-    console.log(selectedFile);
-    console.log(e.target.files.length);
+  const onfromDateChange = (e) => {
+    setFromDate(e.target.value);
   };
 
-  const onSubjectChange = (e) => {
-    setSubject(e.target.value);
-  };
-
-  const onSourceChange = (e) => {
-    setSource(e.target.value);
+  const onToDateChange = (e) => {
+    setToDate(e.target.value);
   };
 
   const onSubmit = (event) => {
     event.preventDefault();
-    console.log(selectedFile);
-    addtickets(subject, source, selectedFile);
-    setSubject("");
-    setSource("");
-    setFileName("");
+    console.log(fromDate);
+    console.log(toDate);
+    generate_report(
+      "ASSIGNED",
+      fromDate.substring(0, fromDate.indexOf("T")),
+      toDate.substring(0, toDate.indexOf("T"))
+    );
+    setClicked(true);
   };
+
+  if (report_url !== null && report_url.filename != null && clicked === true) {
+    var url = report_url.filename.filename;
+    url = url.replace("/root/ticket-status-tacker", "");
+    window.open("http://143.244.131.27:5000" + url);
+    setClicked(false);
+  }
 
   return (
     <div className={classes.root}>
@@ -213,19 +193,16 @@ function NewTicket({ tickets, addtickets }) {
             <Grid item xs={12} className={classes.heading}>
               <Paper className={classes.headingPaper}>
                 <Typography
-                  variant="h5"
+                  variant="h4"
+                  align="center"
                   className={classes.ticketTypography}
                   gutterBottom
                 >
-                  <b>New Ticket</b>
+                  <b>Generate Report</b>
                 </Typography>
               </Paper>
             </Grid>
-            <form
-              className={classes.form}
-              onSubmit={onSubmit}
-              enctype="multipart/form-data"
-            >
+            <form className={classes.form}>
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Container
@@ -234,80 +211,50 @@ function NewTicket({ tickets, addtickets }) {
                     align="center"
                   >
                     <Grid container>
-                      <Grid item xs={12} md={6} lg={4}>
+                      <Grid item xs={12} md={6} lg={6}>
                         <Typography variant="h6" className={classes.formTypo}>
-                          <b>Subject </b>
+                          <b>From Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
                         <TextField
-                          id="standard-textarea"
-                          multiline
-                          value={subject}
-                          style={{ textAlign: "left", width: "20rem" }}
-                          // variant="outlined"
-                          onChange={onSubjectChange}
+                          type="datetime-local"
+                          onChange={onfromDateChange}
+                          value={fromDate}
+                          variant="outlined"
                         />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.descrptioncontainer}>
                       <Grid item xs={12} md={6} lg={4}>
-                        <Typography variant="h6" className={classes.formTypo}>
-                          <b>Source </b>
+                        <Typography
+                          variant="h6"
+                          className={classes.formTypo}
+                          style={{ width: "20rem" }}
+                        >
+                          <b>To Date </b>
                         </Typography>
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
-                        <Select
-                          labelId="simple-select-label-source"
-                          id="simple-select-source"
-                          value={source}
-                          onChange={onSourceChange}
-                          style={{ width: "20rem" }}
-                        >
-                          <MenuItem value={"State"}>State</MenuItem>
-                          <MenuItem value={"District"}>District</MenuItem>
-                          <MenuItem value={"Sub-Division"}>
-                            Sub-Division
-                          </MenuItem>
-                          <MenuItem value={"Gram Panchayat"}>
-                            Gram Panchayat
-                          </MenuItem>
-                          <MenuItem value={"Other Block Offices"}>
-                            Other Block Offices
-                          </MenuItem>
-                          <MenuItem value={"Others"}>Others</MenuItem>
-                        </Select>
-                      </Grid>
-                    </Grid>
-                    <Grid container className={classes.descrptioncontainer}>
-                      <Grid item xs={12} md={6} lg={12}>
-                        <Button
+                        <TextField
+                          style={{ paddingLeft: "8.8rem" }}
+                          type="datetime-local"
+                          onChange={onToDateChange}
+                          value={toDate}
                           variant="outlined"
-                          color="primary"
-                          component="label"
-                        >
-                          To Upload
-                          <input
-                            type="file"
-                            style={{ display: "none" }}
-                            onChange={onFileChange}
-                            multiple
-                          />
-                        </Button>
-                        &nbsp;&nbsp;
-                        {fileName === null ? "Select File" : fileName}
+                        />
                       </Grid>
                     </Grid>
                     <Grid container className={classes.submitcontainer}>
                       <Grid item xs={12} md={6} lg={12}>
                         <Button
-                          type="submit"
                           variant="outlined"
                           color="primary"
+                          onClick={onSubmit}
                           style={{ marginRight: "4rem" }}
-                          disabled={!source || !subject}
+                          disabled={!fromDate || !toDate}
                         >
-                          Submit
+                          Generate Report
                         </Button>
                       </Grid>
                     </Grid>
@@ -315,10 +262,6 @@ function NewTicket({ tickets, addtickets }) {
                 </Paper>
               </Grid>
             </form>
-            {/* Recent Tickets */}
-            <Grid item xs={12}>
-              <TicketsTable withLink="newticket" />
-            </Grid>
           </Grid>
 
           <Box pt={4}>
@@ -331,7 +274,7 @@ function NewTicket({ tickets, addtickets }) {
 }
 
 const mapStateToProps = (state) => ({
-  user: state.auth.user,
+  report_url: state.generate,
 });
 
-export default connect(mapStateToProps, { tickets, addtickets })(NewTicket);
+export default connect(mapStateToProps, { generate_report })(ReportGenerate);

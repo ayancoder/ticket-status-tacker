@@ -8,6 +8,7 @@ import Register from "./components/auth/Register";
 import Dashboard from "./components/dashboard/Dashboard";
 import NewTicketDisplay from "./components/ticket/NewTicketDisplay";
 import { loadUser } from "./actions/auth";
+import ReportGenerate from "./components/report/ReportGenerate";
 import setAuthToken from "./utils/setAuthToken";
 import PrivateRoute from "./components/routing/PrivateRoute";
 // Redux
@@ -40,8 +41,14 @@ const App = () => {
                 path="/dashboard"
                 component={Dashboard}
               ></PrivateRoute>
-              <Route exact path="/tickets" component={NewTicketDisplay}></Route>
+              <Route
+                exact
+                path="/tickets"
+                component={NewTicketDisplay}
+                withLink="tickets"
+              ></Route>
               <Route exact path="/newTicket" component={NewTicket}></Route>
+              <Route exact path="/report" component={ReportGenerate}></Route>
             </Switch>
           </section>
         </Fragment>

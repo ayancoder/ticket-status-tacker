@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const { check, validationResult } = require('express-validator');
 const User = require('../../models/User');
+const logger = require('../../config/winston');
 
 // @route    GET api/auth
 // @desc     Get user by token
@@ -15,7 +16,7 @@ router.get('/', auth, async (req, res) => {
     const user = await User.findById(req.user.id).select('-password -tickets -office');
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send('Server Error');
   }
 });
@@ -25,23 +26,22 @@ router.get('/', auth, async (req, res) => {
 // @access   Public
 router.post(
   '/',
-  check('email', 'Please include a valid email').isEmail(),
+  check('phone', 'Mobile no is required').exists(),
   check('password', 'Password is required').exists(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
-    const { email, password } = req.body;
-
+    const { phone, password } = req.body;
+    logger.info(`usr phone no: ${phone} val: ${password}`);
     try {
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ phone });
 
       if (!user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: 'Invalid Credentials' }] });
+          .json({ errors: [{ msg: 'User does not exisit' }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -49,7 +49,7 @@ router.post(
       if (!isMatch) {
         return res
           .status(400)
-          .json({ errors: [{ msg: 'Invalid Credentials' }] });
+          .json({ errors: [{ msg: 'Worng password' }] });
       }
 
       const payload = {
@@ -69,7 +69,7 @@ router.post(
         }
       );
     } catch (err) {
-      console.error(err.message);
+      logger.error(err.message);
       res.status(500).send('Server error');
     }
   }
