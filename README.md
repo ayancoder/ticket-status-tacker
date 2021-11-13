@@ -10,3 +10,13 @@ Or, if you don't want/need a background service you can just run:
 
 #kill already running node process.
 sudo killall node 
+
+# export mongo db.
+mongodump -d <database_name> -o <directory_backup>
+mongodump -d ticketDB -o .
+
+# import mongo db.
+mongorestore -d <database_name> <directory_backup>
+aadak@aadak-a02 mongo-backup % ls
+ticketDB
+aadak@aadak-a02 mongo-backup % mongorestore -d ticketDB ticketDB
