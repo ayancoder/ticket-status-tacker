@@ -1,6 +1,8 @@
 # ticket-status-tacker
 # install mongo
 brew install mongodb-community@5.0
+# start mongo process
+ brew services start mongodb-community@5.0
 
 # to make mongo run on start
 To have launchd start mongodb/brew/mongodb-community now and restart at login:
