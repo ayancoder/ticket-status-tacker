@@ -33,11 +33,15 @@ router.post(
         creator: req.user.id,
         office: user.office._id,
         avatar: user.avatar,
-        imageFilePath: req.body.imageFilePath,
-        pdfFilePath: req.body.pdfFilePath,
+        //imageFilePath: req.body.imageFilePath,
+        //pdfFilePath: req.body.pdfFilePath,
 
       });
-      let ticket = await newTicket.save();
+      console.log("new ticket ", newTicket);
+      newTicket.imageFilePath =newTicket._id;
+      console.log("new ticket ", newTicket);
+      const ticket = await newTicket.save();
+      console.log("ticket ", ticket);
       // update user with ticket id
       await User.findOneAndUpdate(
         { _id: req.user.id },
