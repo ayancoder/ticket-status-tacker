@@ -53,12 +53,14 @@ router.get(
   }
 );
 
-// @route    GET api/user
+// @route    GET api/user if in req body any role specified 
+//           otherwise all of given office .( office id -> get user id from token
+//           get office id of given user.) 
 // @desc     Get all users
 // @access   only admin can excute
 router.get("/", auth, async (req, res) => {
   try {
-    logger.info("get all user");
+    logger.info(`get all user of role: ${JSON.stringify(req.body.role)}`);
     if (req.user.role === constants.SUPER_ADMIN_ROLE) {
       const users = await User.find();
       res.json(users);
@@ -68,10 +70,10 @@ router.get("/", auth, async (req, res) => {
         "-password -tickets"
       );
       const officeId = ObjectId(adminUser.office);
-      const query = {
-        office: officeId,
-      };
-      logger.info(`get user query  ${query}`);
+      const query = {};
+      if(officeId) query.office = officeId
+      if(req.body.role) query.role = req.body.role;
+      logger.info(`get user query  ${JSON.stringify(query)}`);
       const users = await User.find(query).select("name email phone office");
       res.json(users);
     } else {

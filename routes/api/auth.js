@@ -69,7 +69,7 @@ router.post(
         }
       );
     } catch (err) {
-      logger.error(err.message);
+      logger.error(err);
       res.status(500).send('Server error');
     }
   }
