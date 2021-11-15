@@ -77,7 +77,7 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
 
       const imgFileName = imgFilePath.substr(lastIndex + 1, imgFilePath.length);
       const newImgFilePath = newDir + "/" + imgFileName;
-      console.log("new image file path", newImgFilePath)
+      logger.info(`new image file path  $newImgFilePath`)
 
       mv(imgFilePath, newImgFilePath, function (err) {
         logger.error(err);
@@ -98,8 +98,8 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
 
       const pdfFileName = pdfFilePath.substr(lastIndex + 1, pdfFilePath.length);
       const newPdfFilePath = newDir + "/" + pdfFileName;
-      
-      mv(imgFilePath, newImgFilePath, function (err) {
+      logger.info(`new image file path  $newPdfFilePath`)
+      mv(pdfFileName, newPdfFilePath, function (err) {
         logger.error(err);
       });
 
