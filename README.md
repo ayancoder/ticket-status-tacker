@@ -49,6 +49,17 @@ Ubuntu Path: /etc/mongod.conf
 https://stackoverflow.com/questions/69957163/mongooseserverselectionerror-connect-econnrefused-127017-in-node-v17-and-mon
 
 # start application in ubuntu server
- pm2 stop ticket-tracker
- pm2 start ticket-tracker
- pm2 status
+first time -> 
+pm2 start npm --name "custom_pm2_name" -- run script name
+
+ "scripts": {
+    "start": "node server",
+    "server": "nodemon server",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  }
+
+pm2 start npm --name "ticket-tracker" -- run dev
+pm2 stop ticket-tracker
+pm2 start ticket-tracker
+pm2 status
