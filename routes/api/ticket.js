@@ -77,9 +77,10 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
 
       const imgFileName = imgFilePath.substr(lastIndex + 1, imgFilePath.length);
       const newImgFilePath = newDir + "/" + imgFileName;
-      logger.info(`new image file path ${newImgFilePath}`)
       mv(imgFilePath, newImgFilePath, function (err) {
-        logger.error(err);
+        if (err)  logger.error(err);
+
+        logger.info(`Successfully copied from ${imgFilePath} to  ${newImgFilePath}`)
       });
       imgFiles.push(newImgFilePath);
     }
@@ -96,9 +97,10 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
       }
       const pdfFileName = pdfFilePath.substr(lastIndex + 1, pdfFilePath.length);
       const newPdfFilePath = newDir + "/" + pdfFileName;
-      logger.info(`new pdf file path  ${newPdfFilePath}`)
       mv(pdfFilePath, newPdfFilePath, function (err) {
-        logger.error(err);
+        if (err)  logger.error(err);
+        
+        logger.info(`Successfully copied from ${pdfFilePath} to  ${newPdfFilePath}`);
       });
 
       pdfFiles.push(newPdfFilePath);
