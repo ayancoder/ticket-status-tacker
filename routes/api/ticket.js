@@ -98,7 +98,7 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
       }
       const pdfFileName = pdfFilePath.substr(lastIndex + 1, pdfFilePath.length);
       const newPdfFilePath = newDir + "/" + pdfFileName;
-      console.log("old pdf path",imgFilePath);
+      console.log("old pdf path",pdfFilePath);
       logger.info(`new pdf file path  ${newPdfFilePath}`)
       mv(pdfFileName, newPdfFilePath, function (err) {
         logger.error(err);

@@ -10,7 +10,6 @@ const moment = require('moment');
 const logger = require('../../config/winston');
 
 const fileFilter = (req, file, callback) => {
-  logger.info(`file :${file}`)
   if(file.mimetype === 'image/jpeg' || 
     file.mimetype === 'image/png'||
     file.mimetype == 'application/pdf'){
