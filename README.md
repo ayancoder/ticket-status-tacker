@@ -47,3 +47,8 @@ OSX path : /usr/local/etc/mongod.conf
 Ubuntu Path: /etc/mongod.conf
 
 https://stackoverflow.com/questions/69957163/mongooseserverselectionerror-connect-econnrefused-127017-in-node-v17-and-mon
+
+# start application in ubuntu server
+ pm2 stop ticket-tracker
+ pm2 start ticket-tracker
+ pm2 status
