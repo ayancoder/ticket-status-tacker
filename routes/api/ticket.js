@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const fs = require('fs');
+const mv = require('mv');
 const ObjectId = mongoose.Types.ObjectId;
 const { check, validationResult } = require("express-validator");
 const auth = require("../../middleware/auth");
@@ -33,13 +35,11 @@ router.post(
         creator: req.user.id,
         office: user.office._id,
         avatar: user.avatar,
-        //imageFilePath: req.body.imageFilePath,
-        //pdfFilePath: req.body.pdfFilePath,
 
       });
-      console.log("new ticket ", newTicket);
-      newTicket.imageFilePath =newTicket._id;
-      console.log("new ticket ", newTicket);
+      const filePaths = moveFiles(req.body.imageFilePath, req.body.pdfFilePath, newTicket._id);
+      newTicket.imageFilePath = filePaths.imgFiles;
+      newTicket.pdfFilePath = filePaths.pdfFiles;
       const ticket = await newTicket.save();
       console.log("ticket ", ticket);
       // update user with ticket id
@@ -62,6 +62,52 @@ router.post(
     }
   }
 );
+
+const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
+  let pdfFiles = [];
+  let imgFiles = [];
+  imageFilePaths.forEach(imgFilePath => {
+    if (imgFilePath) {
+      const lastIndex = imgFilePath.lastIndexOf("/");
+      const existingDir = imgFilePath.substr(0, lastIndex);
+      const newDir = existingDir + "/" + ticketId;
+      if (!fs.existsSync(newDir)) {
+        fs.mkdirSync(newDir, { recursive: true });
+      }
+
+      const imgFileName = imgFilePath.substr(lastIndex + 1, imgFilePath.length);
+      const newImgFilePath = newDir + "/" + imgFileName;
+      console.log("new image file path", newImgFilePath)
+
+      mv(imgFilePath, newImgFilePath, function (err) {
+        logger.error(err);
+      });
+      imgFiles.push(newImgFilePath);
+    }
+  });
+
+  pdfFilePaths.forEach(pdfFilePath => {
+    if (pdfFilePath) {
+      const lastIndex = pdfFilePath.lastIndexOf("/");
+      const existingDir = pdfFilePath.substr(0, lastIndex);
+
+      const newDir = existingDir + "/" + ticketId;
+      if (!fs.existsSync(newDir)) {
+        fs.mkdirSync(newDir, { recursive: true });
+      }
+
+      const pdfFileName = pdfFilePath.substr(lastIndex + 1, pdfFilePath.length);
+      const newPdfFilePath = newDir + "/" + pdfFileName;
+      
+      mv(imgFilePath, newImgFilePath, function (err) {
+        logger.error(err);
+      });
+
+      pdfFiles.push(newPdfFilePath);
+    }
+  });
+  return { "pdfFiles": pdfFiles, "imgFiles": imgFiles }
+}
 
 // @route    PUT api/tickets/:ticket_id
 // @desc     update an existing ticket. subject/soruce/state/priority can be updated.
