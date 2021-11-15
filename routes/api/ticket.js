@@ -64,7 +64,6 @@ router.post(
 );
 
 const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
-  console.log("imageFilePaths pdfFilePaths",imageFilePaths, pdfFilePaths)
   let pdfFiles = [];
   let imgFiles = [];
   imageFilePaths.forEach(imgFilePath => {
@@ -78,7 +77,6 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
 
       const imgFileName = imgFilePath.substr(lastIndex + 1, imgFilePath.length);
       const newImgFilePath = newDir + "/" + imgFileName;
-      console.log("old image path",imgFilePath);
       logger.info(`new image file path ${newImgFilePath}`)
       mv(imgFilePath, newImgFilePath, function (err) {
         logger.error(err);
@@ -98,9 +96,8 @@ const moveFiles = (imageFilePaths, pdfFilePaths, ticketId) => {
       }
       const pdfFileName = pdfFilePath.substr(lastIndex + 1, pdfFilePath.length);
       const newPdfFilePath = newDir + "/" + pdfFileName;
-      console.log("old pdf path",pdfFilePath);
       logger.info(`new pdf file path  ${newPdfFilePath}`)
-      mv(pdfFileName, newPdfFilePath, function (err) {
+      mv(pdfFilePath, newPdfFilePath, function (err) {
         logger.error(err);
       });
 
