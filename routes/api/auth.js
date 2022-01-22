@@ -1,23 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const auth = require('../../middleware/auth');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const { check, validationResult } = require('express-validator');
-const User = require('../../models/User');
-const logger = require('../../config/winston');
+const bcrypt = require("bcryptjs");
+const auth = require("../../middleware/auth");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const { check, validationResult } = require("express-validator");
+const User = require("../../models/User");
+const logger = require("../../config/winston");
 
 // @route    GET api/auth
 // @desc     Get user by token
 // @access   Private
-router.get('/', auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password -tickets -office');
+    const user = await User.findById(req.user.id).select(
+      "-password -tickets -office"
+    );
     res.json(user);
   } catch (err) {
     logger.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 });
 
@@ -25,9 +27,9 @@ router.get('/', auth, async (req, res) => {
 // @desc     Authenticate user & get token
 // @access   Public
 router.post(
-  '/',
-  check('phone', 'Mobile no is required').exists(),
-  check('password', 'Password is required').exists(),
+  "/",
+  check("phone", "Mobile no is required").exists(),
+  check("password", "Password is required").exists(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -41,28 +43,26 @@ router.post(
       if (!user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: 'User does not exisit' }] });
+          .json({ errors: [{ msg: "User does not exist" }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: 'Worng password' }] });
+        return res.status(400).json({ errors: [{ msg: "Wrong password" }] });
       }
 
       const payload = {
         user: {
           id: user.id,
-          role: user.role
-        }
+          role: user.role,
+        },
       };
 
       jwt.sign(
         payload,
-        config.get('jwtSecret'),
-        { expiresIn: '5 days' },
+        config.get("jwtSecret"),
+        { expiresIn: "5 days" },
         (err, token) => {
           if (err) throw err;
           res.json({ token });
@@ -70,7 +70,7 @@ router.post(
       );
     } catch (err) {
       logger.error(err);
-      res.status(500).send('Server error');
+      res.status(500).send("Server error");
     }
   }
 );

@@ -101,9 +101,9 @@ export const login = (password, phone) => async (dispatch) => {
     });
     dispatch(loadUser());
   } catch (err) {
-    console.log("err->", err);
     dispatch({
       type: LOGIN_ALERT_OPEN,
+      alertMsg: err?.response?.data?.errors[0]?.msg,
     });
     dispatch({
       type: LOGIN_FAIL,

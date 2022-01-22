@@ -16,6 +16,7 @@ const initialState = {
   loading: true,
   user: null,
   alertOpen: false,
+  alertMsg: "",
   dealingOfficers: [],
 };
 
@@ -63,6 +64,7 @@ export default function (state = initialState, action) {
       return {
         ...state,
         alertOpen: true,
+        alertMsg: action.alertMsg,
       };
     case LOGIN_ALERT_CLOSE:
       return {

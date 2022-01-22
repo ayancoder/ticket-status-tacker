@@ -69,7 +69,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = ({ login, isAuthenticated, alertOpen, closeSnackBar }) => {
+const Login = ({
+  login,
+  isAuthenticated,
+  alertOpen,
+  closeSnackBar,
+  alertMsg,
+}) => {
   const classes = useStyles();
 
   const [formData, setFormData] = useState({
@@ -183,7 +189,7 @@ const Login = ({ login, isAuthenticated, alertOpen, closeSnackBar }) => {
           }}
         >
           <Alert onClose={handleClose} severity="error">
-            Login Failed , Please Enter Correct Phone Number & Password
+            Failed To Login , {alertMsg}
           </Alert>
         </Snackbar>
       </Grid>
@@ -199,6 +205,7 @@ Login.propTypes = {
 const mapStateToProps = (state) => ({
   isAuthenticated: state?.auth?.isAuthenticated,
   alertOpen: state?.auth?.alertOpen,
+  alertMsg: state?.auth?.alertMsg,
 });
 
 export default connect(mapStateToProps, { login, closeSnackBar })(Login);
