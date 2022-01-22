@@ -114,22 +114,6 @@ function NestedList({ auth }) {
         </Collapse>
       )}
 
-      {auth.user != null && auth.user.role === "CC_OFFICER" && (
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItem
-              button
-              className={classes.nested}
-              onClick={newTicketButtonHandler}
-            >
-              <ListItemIcon>
-                <CreateOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Create New " />
-            </ListItem>
-          </List>
-        </Collapse>
-      )}
       {auth.user != null && auth.user.role !== "DEALING_OFFICER" && (
         <ListItem button onClick={reportGenerateButtonHandler}>
           <ListItemIcon>

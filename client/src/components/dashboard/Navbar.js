@@ -17,6 +17,7 @@ import { connect } from "react-redux";
 import useWindowDimensions from "./useWindowDimensions";
 import Tooltip from "@material-ui/core/Tooltip";
 import { logout } from "../../actions/auth";
+import { useHistory } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -95,6 +96,7 @@ function Navbar({ logout }) {
   const [isclose, setIsClose] = React.useState(0);
   const [open, setOpen] = React.useState(true);
   const { height, width } = useWindowDimensions();
+  const history = useHistory();
 
   React.useEffect(() => {
     const parsedIsClose = true;
@@ -148,7 +150,12 @@ function Navbar({ logout }) {
           </IconButton>
           <IconButton color="inherit">
             <Tooltip title="Logout">
-              <ExitToApp onClick={() => logout()} />
+              <ExitToApp
+                onClick={() => {
+                  history.push("/dashboard");
+                  logout();
+                }}
+              />
             </Tooltip>
           </IconButton>
         </Toolbar>
