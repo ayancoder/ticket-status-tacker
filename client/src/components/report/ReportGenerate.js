@@ -218,7 +218,7 @@ function ReportGenerate({ report_url, generate_report }) {
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
                         <TextField
-                          type="datetime-local"
+                          type="date"
                           onChange={onfromDateChange}
                           value={fromDate}
                           variant="outlined"
@@ -237,8 +237,8 @@ function ReportGenerate({ report_url, generate_report }) {
                       </Grid>
                       <Grid item xs={12} md={6} lg={6}>
                         <TextField
-                          style={{ paddingLeft: "8.8rem" }}
-                          type="datetime-local"
+                          style={{ paddingLeft: "11.5rem" }}
+                          type="date"
                           onChange={onToDateChange}
                           value={toDate}
                           variant="outlined"

@@ -662,6 +662,7 @@ function EditTicket({
                                     value={comment}
                                     placeholder="Enter you Comment Here"
                                     style={{
+                                      fontSize: 19,
                                       width: "31rem",
                                       height: "3rem",
                                       marginTop: "1rem",
