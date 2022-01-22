@@ -4,7 +4,10 @@ import {
   LOGIN_SUCCESS,
   LOGIN_FAIL,
   USER_LOADED,
+  LOGOUT,
   FETCH_USERS_SUCCESS,
+  LOGIN_ALERT_CLOSE,
+  LOGIN_ALERT_OPEN,
 } from "../actions/types";
 
 const initialState = {
@@ -12,6 +15,7 @@ const initialState = {
   isAuthenticated: null,
   loading: true,
   user: null,
+  alertOpen: false,
   dealingOfficers: [],
 };
 
@@ -50,7 +54,21 @@ export default function (state = initialState, action) {
         ...state,
         dealingOfficers: action.dealingOfficers,
       };
-      break;
+    case LOGOUT:
+      return {
+        ...state,
+        isAuthenticated: false,
+      };
+    case LOGIN_ALERT_OPEN:
+      return {
+        ...state,
+        alertOpen: true,
+      };
+    case LOGIN_ALERT_CLOSE:
+      return {
+        ...state,
+        alertOpen: false,
+      };
     default:
       return state;
   }

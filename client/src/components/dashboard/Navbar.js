@@ -11,8 +11,12 @@ import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
 import MenuIcon from "@material-ui/icons/Menu";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import ExitToApp from "@material-ui/icons/ExitToApp";
 import NestedList from "./NestedList";
-import useWindowDimensions from './useWindowDimensions';
+import { connect } from "react-redux";
+import useWindowDimensions from "./useWindowDimensions";
+import Tooltip from "@material-ui/core/Tooltip";
+import { logout } from "../../actions/auth";
 
 const drawerWidth = 240;
 
@@ -44,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   drawerPaper: {
-    marginTop:theme.spacing(2),
+    marginTop: theme.spacing(2),
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
@@ -81,13 +85,12 @@ const useStyles = makeStyles((theme) => ({
   fixedHeight: {
     height: 240,
   },
-  divider:{
-     marginTop: theme.spacing(3),
-  }
+  divider: {
+    marginTop: theme.spacing(3),
+  },
 }));
 
-export default function Navbar() {
-
+function Navbar({ logout }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
   const [open, setOpen] = React.useState(true);
@@ -111,8 +114,6 @@ export default function Navbar() {
       setOpen(isclose);
     }
   };
-
-
 
   return (
     <div>
@@ -138,12 +139,17 @@ export default function Navbar() {
             noWrap
             className={classes.title}
           >
-            Dashboard 
+            DMS
           </Typography>
           <IconButton color="inherit">
             <Badge badgeContent={4} color="secondary">
               <NotificationsIcon />
             </Badge>
+          </IconButton>
+          <IconButton color="inherit">
+            <Tooltip title="Logout">
+              <ExitToApp onClick={() => logout()} />
+            </Tooltip>
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -158,7 +164,6 @@ export default function Navbar() {
           <Divider />
           <NestedList />
           <Divider className={classes.divider} />
-          {/**<List>{secondaryListItems}</List> */}
         </Drawer>
       ) : (
         open && (
@@ -175,10 +180,15 @@ export default function Navbar() {
             <Divider />
             <NestedList />
             <Divider className={classes.divider} />
-            {/**<List>{secondaryListItems}</List> */}
           </Drawer>
         )
       )}
     </div>
   );
 }
+
+const mapStateToProps = (state) => ({});
+
+export default connect(mapStateToProps, {
+  logout,
+})(Navbar);
