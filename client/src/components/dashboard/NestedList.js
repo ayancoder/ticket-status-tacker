@@ -104,17 +104,17 @@ function NestedList({ auth }) {
                 <ListItemText primary="Assignned To Me " />
               </ListItem>
             )}
-            <ListItem button className={classes.nested}>
+            {/* <ListItem button className={classes.nested}>
               <ListItemIcon>
                 <StarBorder />
               </ListItemIcon>
               <ListItemText primary="My Tickets " />
-            </ListItem>
+            </ListItem> */}
           </List>
         </Collapse>
       )}
 
-      {auth.user != null && auth.user.role === "TICKET_OPERATOR" && (
+      {auth.user != null && auth.user.role === "CC_OFFICER" && (
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItem
@@ -130,12 +130,14 @@ function NestedList({ auth }) {
           </List>
         </Collapse>
       )}
-      <ListItem button onClick={reportGenerateButtonHandler}>
-        <ListItemIcon>
-          <AssessmentRoundedIcon />
-        </ListItemIcon>
-        <ListItemText primary="Generate Report" />
-      </ListItem>
+      {auth.user != null && auth.user.role !== "DEALING_OFFICER" && (
+        <ListItem button onClick={reportGenerateButtonHandler}>
+          <ListItemIcon>
+            <AssessmentRoundedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Generate Report" />
+        </ListItem>
+      )}
       <ListItem button>
         <ListItemIcon>
           <AccountCircleIcon />

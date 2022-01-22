@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -15,6 +15,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { login } from "../../actions/auth";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
+import { closeSnackBar } from "../../actions/auth";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
 
 function Copyright() {
   return (
@@ -27,6 +30,10 @@ function Copyright() {
       {"."}
     </Typography>
   );
+}
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -62,14 +69,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = ({ login, isAuthenticated }) => {
+const Login = ({ login, isAuthenticated, alertOpen, closeSnackBar }) => {
   const classes = useStyles();
 
   const [formData, setFormData] = useState({
     password: "",
     phone: "",
   });
-
   const { password, phone } = formData;
 
   const onChange = (e) =>
@@ -79,6 +85,15 @@ const Login = ({ login, isAuthenticated }) => {
     e.preventDefault();
     console.log(e);
     login(password, phone);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    alertOpen = false;
+    closeSnackBar();
   };
 
   if (isAuthenticated) {
@@ -157,6 +172,20 @@ const Login = ({ login, isAuthenticated }) => {
             </Box>
           </form>
         </div>
+        <Snackbar
+          open={alertOpen}
+          autoHideDuration={2500}
+          onClose={handleClose}
+          style={{ width: "40rem" }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+        >
+          <Alert onClose={handleClose} severity="error">
+            Login Failed , Please Enter Correct Phone Number & Password
+          </Alert>
+        </Snackbar>
       </Grid>
     </Grid>
   );
@@ -168,7 +197,8 @@ Login.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  isAuthenticated: state.auth.isAuthenticated,
+  isAuthenticated: state?.auth?.isAuthenticated,
+  alertOpen: state?.auth?.alertOpen,
 });
 
-export default connect(mapStateToProps, { login })(Login);
+export default connect(mapStateToProps, { login, closeSnackBar })(Login);

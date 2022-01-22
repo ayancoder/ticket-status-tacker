@@ -11,6 +11,8 @@ import {
   AUTH_ERROR,
   FETCH_USERS_SUCCESS,
   LOGOUT,
+  LOGIN_ALERT_CLOSE,
+  LOGIN_ALERT_OPEN,
 } from "./types";
 
 // Load User
@@ -97,14 +99,16 @@ export const login = (password, phone) => async (dispatch) => {
       type: LOGIN_SUCCESS,
       payload: res.data,
     });
-
     dispatch(loadUser());
   } catch (err) {
     console.log("err->", err);
+    dispatch({
+      type: LOGIN_ALERT_OPEN,
+    });
+    dispatch({
+      type: LOGIN_FAIL,
+    });
   }
-  dispatch({
-    type: LOGIN_FAIL,
-  });
 };
 
 export const fetchAllDealingOfficer = () => async (dispatch) => {
@@ -120,4 +124,14 @@ export const fetchAllDealingOfficer = () => async (dispatch) => {
   } catch (e) {}
 };
 
-export const logout = () => (dispatch) => {};
+export const logout = () => async (dispatch) => {
+  dispatch({
+    type: LOGOUT,
+  });
+};
+
+export const closeSnackBar = () => async (dispatch) => {
+  dispatch({
+    type: LOGIN_ALERT_CLOSE,
+  });
+};
