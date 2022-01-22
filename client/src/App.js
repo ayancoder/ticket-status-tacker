@@ -6,11 +6,13 @@ import Alert from "./components/layout/Alert";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Dashboard from "./components/dashboard/Dashboard";
+import EditTicket from "./components/ticket/EditTicket";
 import NewTicketDisplay from "./components/ticket/NewTicketDisplay";
 import { loadUser } from "./actions/auth";
 import ReportGenerate from "./components/report/ReportGenerate";
 import setAuthToken from "./utils/setAuthToken";
 import PrivateRoute from "./components/routing/PrivateRoute";
+
 // Redux
 import { Provider } from "react-redux";
 import store from "./store";
@@ -43,9 +45,41 @@ const App = () => {
               ></PrivateRoute>
               <Route
                 exact
-                path="/tickets"
-                component={NewTicketDisplay}
-                withLink="tickets"
+                path="/new_tickets"
+                component={() => (
+                  <NewTicketDisplay ticketType="NEW"></NewTicketDisplay>
+                )}
+              ></Route>
+              <Route
+                exact
+                path="/open_tickets"
+                component={() => (
+                  <NewTicketDisplay ticketType="IN-PROGRESS"></NewTicketDisplay>
+                )}
+              ></Route>
+              <Route
+                exact
+                path="/close_tickets"
+                component={() => (
+                  <NewTicketDisplay ticketType="RESOLVED"></NewTicketDisplay>
+                )}
+              ></Route>
+              <Route
+                exact
+                path="/assigned_tickets"
+                component={() => (
+                  <NewTicketDisplay ticketType="ASSIGNED"></NewTicketDisplay>
+                )}
+              ></Route>
+              <Route
+                exact
+                path="/ticket/details"
+                component={EditTicket}
+              ></Route>
+              <Route
+                exact
+                path="/ticket/details"
+                component={EditTicket}
               ></Route>
               <Route exact path="/newTicket" component={NewTicket}></Route>
               <Route exact path="/report" component={ReportGenerate}></Route>

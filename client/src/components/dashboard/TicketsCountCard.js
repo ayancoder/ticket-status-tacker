@@ -19,7 +19,8 @@ const useStyles = makeStyles({
     marginBottom: 12,
   },
   card: {
-    margin: 16,
+    marginTop: 14,
+    width: 180,
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -32,7 +33,16 @@ function TicketCountCard({ ticketType, color, ticketCount }) {
   const newButtonHandler = (e) => {
     switch (ticketType) {
       case "New Ticket":
-        history.push("/tickets");
+        history.push("/new_tickets");
+        break;
+      case "Open Ticket":
+        history.push("/open_tickets");
+        break;
+      case "Closed Ticket":
+        history.push("/close_tickets");
+        break;
+      case "Assigned Ticket":
+        history.push("/assigned_tickets");
         break;
       default:
         console.log("Option Not Present");
@@ -44,19 +54,22 @@ function TicketCountCard({ ticketType, color, ticketCount }) {
       <div style={{ display: "flex" }}>
         <CardContent>
           <Typography variant="h2" component="h2" color={color}>
-            {ticketCount != null && ticketCount.tickets.total}
+            {ticketType === "New Ticket"
+              ? ticketCount?.ticket?.stateTickets?.newTickets
+              : ticketType === "Open Ticket"
+              ? ticketCount?.ticket?.stateTickets?.openTickets
+              : ticketType === "Closed Ticket"
+              ? ticketCount?.ticket?.stateTickets?.resolvedTickets
+              : ticketType === "Assigned Ticket"
+              ? ticketCount?.ticket?.stateTickets?.assignedTickets
+              : {}}
           </Typography>
         </CardContent>
       </div>
 
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", textAlign: "center" }}>
         <CardActions>
-          <Button
-            variant="contained"
-            color={color}
-            className={classes.button}
-            onClick={newButtonHandler}
-          >
+          <Button variant="contained" color={color} onClick={newButtonHandler}>
             {ticketType}
           </Button>
         </CardActions>
@@ -66,7 +79,7 @@ function TicketCountCard({ ticketType, color, ticketCount }) {
 }
 
 const mapStateToProps = (state) => ({
-  ticketCount: state.ticket,
+  ticketCount: state,
 });
 
 export default connect(mapStateToProps)(TicketCountCard);

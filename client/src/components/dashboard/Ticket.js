@@ -1,23 +1,71 @@
-import React from 'react';
-import Link from '@material-ui/core/Link';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Title from './Title';
+import React from "react";
+import Link from "@material-ui/core/Link";
+import { makeStyles } from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Title from "./Title";
 
 // Generate Order Data
-function createData(id, subject, createdBy, createDate,assignedTo, assignedDate, status) {
-  return { id, subject, createdBy, createDate,assignedTo, assignedDate, status };
+function createData(
+  id,
+  subject,
+  createdBy,
+  createDate,
+  assignedTo,
+  assignedDate,
+  status
+) {
+  return {
+    id,
+    subject,
+    createdBy,
+    createDate,
+    assignedTo,
+    assignedDate,
+    status,
+  };
 }
 
 const rows = [
-  createData(0,'application for home', 'Elvis Presley', '16 Mar, 2019', 'Paul McCartney', '16 Mar, 2019', 'New'),
-  createData(1, 'application for pension', 'Paul McCartney', '16 Mar, 2019', 'Tom Scholz', '16 Mar, 2019', 'Resolved'),
-  createData(2,'application for home', 'Elvis Presley', '16 Mar, 2019', 'Paul McCartney', '16 Mar, 2019', 'New'),
-  createData(3, 'application for pension', 'Paul McCartney', '16 Mar, 2019', 'Tom Scholz', '16 Mar, 2019', 'Resolved'),
+  createData(
+    0,
+    "application for home",
+    "Elvis Presley",
+    "16 Mar, 2019",
+    "Paul McCartney",
+    "16 Mar, 2019",
+    "New"
+  ),
+  createData(
+    1,
+    "application for pension",
+    "Paul McCartney",
+    "16 Mar, 2019",
+    "Tom Scholz",
+    "16 Mar, 2019",
+    "Resolved"
+  ),
+  createData(
+    2,
+    "application for home",
+    "Elvis Presley",
+    "16 Mar, 2019",
+    "Paul McCartney",
+    "16 Mar, 2019",
+    "New"
+  ),
+  createData(
+    3,
+    "application for pension",
+    "Paul McCartney",
+    "16 Mar, 2019",
+    "Tom Scholz",
+    "16 Mar, 2019",
+    "Resolved"
+  ),
 ];
 
 function preventDefault(event) {
@@ -68,4 +116,4 @@ export default function Tickets() {
       </div>
     </React.Fragment>
   );
-};
+}

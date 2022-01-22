@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { useDispatch } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
@@ -21,6 +22,10 @@ import { login } from "../../actions/auth";
 import TicketCountCard from "./TicketsCountCard";
 import TicketsTable from "../ticket/TicketTable";
 import Navbar from "./Navbar";
+import {
+  getcountticketstypes,
+  getDelingOfficerTickets,
+} from "../../actions/ticket";
 
 function Copyright() {
   return (
@@ -79,20 +84,13 @@ const useStyles = makeStyles((theme) => ({
 
 function Dashboard({ auth }) {
   const classes = useStyles();
-  const [isclose, setIsClose] = React.useState(0);
+
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
-    const parsedIsClose = true;
-    setIsClose(parsedIsClose);
+    console.log(auth);
+    dispatch(getcountticketstypes());
   }, []);
-
-  React.useEffect(() => {
-    localStorage.setItem("isclose", isclose);
-  }, [isclose]);
-
-  // const handleDrawerClose = () => {
-  //   setOpen(false);
-  // };
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -104,16 +102,26 @@ function Dashboard({ auth }) {
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             {/* ticket count card*/}
-            <Grid item xs={12} md={6} lg={4}>
-              <TicketCountCard ticketType="New Ticket" color="secondary" />
-            </Grid>
+            {auth.user != null && auth.user.role !== "DEALING_OFFICER" && (
+              <Grid item xs={12} md={6} lg={3}>
+                <TicketCountCard ticketType="New Ticket" color="secondary" />
+              </Grid>
+            )}
             {auth.user != null && auth.user.role !== "CC_OFFICER" && (
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={12} md={6} lg={3}>
+                <TicketCountCard
+                  ticketType="Assigned Ticket"
+                  color="secondary"
+                />
+              </Grid>
+            )}
+            {auth.user != null && auth.user.role !== "CC_OFFICER" && (
+              <Grid item xs={12} md={6} lg={3}>
                 <TicketCountCard ticketType="Open Ticket" color="primary" />
               </Grid>
             )}
             {auth.user != null && auth.user.role !== "CC_OFFICER" && (
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={12} md={6} lg={3}>
                 <TicketCountCard ticketType="Closed Ticket" color="primary" />
               </Grid>
             )}
@@ -125,7 +133,11 @@ function Dashboard({ auth }) {
             </Grid>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-              <TicketsTable withLink="dashboard" />
+              {auth?.user?.role !== "DEALING_OFFICER" ? (
+                <TicketsTable ticketType="NEW" />
+              ) : (
+                <TicketsTable ticketType="ASSIGNED" />
+              )}
             </Grid>
           </Grid>
 

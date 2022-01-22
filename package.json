@@ -14,7 +14,8 @@
   "dependencies": {
     "@date-io/date-fns": "^2.11.0",
     "@date-io/dayjs": "^2.11.0",
-    "@emotion/react": "^11.4.1",
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/pickers": "^3.3.10",
     "@mui/lab": "^5.0.0-alpha.47",
