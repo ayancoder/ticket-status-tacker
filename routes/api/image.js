@@ -54,6 +54,7 @@ const upload = multer({
 
   
 router.post("/upload", auth, (req, res) => {
+  log.info("calling file upload");
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
@@ -68,13 +69,14 @@ router.post("/upload", auth, (req, res) => {
         }
       });
       logger.info('file uploaded successfully');
-      return res.status(200)
+       res.status(200)
         .json({
           message: "Image Uploaded Successfully !",
           pdf: pdfFilePath,
           img: imgFilePath,
         });
     }
+    logger.info('---> file uploaded successfully');
   });
 });
 
