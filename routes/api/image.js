@@ -69,14 +69,13 @@ router.post("/upload", auth, (req, res) => {
         }
       });
       logger.info('file uploaded successfully');
-       res.status(200)
+      return res.status(200)
         .json({
           message: "Image Uploaded Successfully !",
           pdf: pdfFilePath,
           img: imgFilePath,
         });
     }
-    logger.info('---> file uploaded successfully');
   });
 });
 
