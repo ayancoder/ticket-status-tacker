@@ -9,6 +9,7 @@ import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
 import TicketsTable from "./TicketTable";
 import Navbar from "../dashboard/Navbar";
+import { connect } from "react-redux";
 
 function Copyright() {
   return (
@@ -66,10 +67,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Dashboard() {
+function Dashboard({ ticketType, user }) {
+  console.log(user);
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
-
+  console.log(ticketType);
   React.useEffect(() => {
     const parsedIsClose = true;
     setIsClose(parsedIsClose);
@@ -88,13 +90,15 @@ export default function Dashboard() {
       <main className={classes.content}>
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
-            {/* ticket count card*/}
-            {/* Recent Tickets */}
             <Grid item xs={12}>
-              <TicketsTable withLink="true" />
+              {user?.auth?.user?.role === "DEALING_OFFICER" &&
+              ticketType === "NEW" ? (
+                <TicketsTable ticketType={"ASSIGNED"} />
+              ) : (
+                <TicketsTable ticketType={ticketType} />
+              )}
             </Grid>
           </Grid>
-
           <Box pt={4}>
             <Copyright />
           </Box>
@@ -103,3 +107,7 @@ export default function Dashboard() {
     </div>
   );
 }
+const mapStateToProps = (state) => ({
+  user: state,
+});
+export default connect(mapStateToProps)(Dashboard);

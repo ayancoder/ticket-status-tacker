@@ -1,38 +1,186 @@
 import axios from "axios";
 import { setAlert } from "./alert";
 import setAuthToken from "../utils/setAuthToken";
-import { GET_POSTS, GET_POST, ADD_POST } from "./types";
+import {
+  GET_POSTS,
+  GET_POST,
+  ADD_POST,
+  GET_COUNT,
+  ALERT_OPEN,
+  ALERT_CLOSE,
+  FETCH_COMMENTS,
+} from "./types";
+import ticket from "../reducers/ticket";
 
-export const tickets = (state, page, limit) => async (dispatch) => {
-  try {
-    console.log("Page " + page);
-    if (localStorage.token) {
-      setAuthToken(localStorage.token);
-    }
-    const res = await axios.get(
-      "http://143.244.131.27:5000/api/tickets?state=" +
+export const tickets =
+  (state, page, limit, assign, subject) => async (dispatch) => {
+    try {
+      if (localStorage.token) {
+        setAuthToken(localStorage.token);
+      }
+      var fetchTicket =
+        "http://143.244.131.27:5000/api/tickets?state=" +
         state +
         "&page=" +
         page +
         "&limit=" +
-        limit
+        limit;
+      if (assign != null) {
+        fetchTicket = fetchTicket + "&assign=" + assign;
+      }
+      if (subject != null) {
+        fetchTicket = fetchTicket + "&subject=" + subject;
+      }
+      const res = await axios.get(fetchTicket);
+
+      dispatch({
+        type: GET_POSTS,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.log("failed get ", err);
+      //const errors = err.response.data.errors;
+
+      //if (errors) {
+      // errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
+      //}
+
+      //   dispatch({
+      //     type: REGISTER_FAIL,
+      //   });
+    }
+  };
+export const getTicketComments = (ticketId) => async (dispatch) => {
+  try {
+    if (localStorage.token) {
+      setAuthToken(localStorage.token);
+    }
+    const res = await axios.get(
+      "http://143.244.131.27:5000/api/tickets/ticket_id/" + ticketId
     );
+    if (res) {
+      console.log(res.data.comments);
+      dispatch({
+        type: FETCH_COMMENTS,
+        comments: res.data.comments,
+      });
+    }
+  } catch (e) {}
+};
 
-    dispatch({
-      type: GET_POSTS,
-      payload: res.data,
-    });
-  } catch (err) {
-    console.log("failed get ", err);
-    //const errors = err.response.data.errors;
+export const editTickets =
+  (ticketId, assigneeId, priority, commentText, user, state) =>
+  async (dispatch) => {
+    try {
+      if (localStorage.token) {
+        setAuthToken(localStorage.token);
+      }
+      var res = null;
+      if (user === "BDO") {
+        var body = {
+          assigneeId,
+          priority,
+          commentText,
+        };
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        body = JSON.stringify(body);
+        res = await axios.put(
+          "http://143.244.131.27:5000/api/tickets/assign/" + ticketId,
+          body,
+          config
+        );
+      } else if (user === "DEALING_OFFICER") {
+        var dealBody = {
+          state,
+        };
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        dealBody = JSON.stringify(dealBody);
+        res = await axios.put(
+          "http://143.244.131.27:5000/api/tickets/" + ticketId,
+          dealBody,
+          config
+        );
 
-    //if (errors) {
-    // errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
-    //}
+        body = {
+          commentText,
+        };
 
-    //   dispatch({
-    //     type: REGISTER_FAIL,
-    //   });
+        body = JSON.stringify(body);
+        const resComment = await axios.post(
+          "http://143.244.131.27:5000/api/tickets/comment/" + ticketId,
+          body,
+          config
+        );
+      }
+      dispatch({
+        type: ALERT_OPEN,
+        alertOpen: true,
+      });
+    } catch (e) {}
+  };
+
+export const addComments = (ticketId, commentText) => async (dispatch) => {
+  try {
+    if (localStorage.token) {
+      setAuthToken(localStorage.token);
+    }
+    var body = {
+      commentText,
+    };
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    body = JSON.stringify(body);
+    const res = await axios.post(
+      "http://143.244.131.27:5000/api/tickets/comment/" + ticketId,
+      body,
+      config
+    );
+    if (res) {
+      console.log(res);
+    }
+  } catch (e) {}
+};
+
+export const getcountticketstypes = () => async (dispatch) => {
+  try {
+    if (localStorage.token) {
+      setAuthToken(localStorage.token);
+    }
+    const res = await axios.get("http://143.244.131.27:5000/api/tickets/count");
+    if (res) {
+      var newTickets =
+        res?.data?.newTicket === undefined ? 0 : res?.data?.newTicket;
+      var openTickets =
+        res?.data?.inprogressTicket === undefined
+          ? 0
+          : res?.data?.inprogressTicket;
+      var resolvedTickets =
+        res?.data?.resolvedTicket === undefined ? 0 : res?.data?.resolvedTicket;
+      var assignedTickets =
+        res?.data?.assignedTicket === undefined ? 0 : res?.data?.assignedTicket;
+      dispatch({
+        type: GET_COUNT,
+        stateTickets: {
+          newTickets,
+          openTickets,
+          resolvedTickets,
+          assignedTickets,
+        },
+      });
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -88,6 +236,10 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
       type: ADD_POST,
       payload: res.data,
     });
+    dispatch({
+      type: ALERT_OPEN,
+      alertOpen: true,
+    });
   } catch (err) {
     console.log("failed to create ticket ", err);
     //const errors = err.response.data.errors;
@@ -100,4 +252,10 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
     //     type: REGISTER_FAIL,
     //   });
   }
+};
+
+export const closeSnackBar = () => async (dispatch) => {
+  dispatch({
+    type: ALERT_CLOSE,
+  });
 };

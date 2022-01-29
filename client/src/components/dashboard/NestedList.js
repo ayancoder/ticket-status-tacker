@@ -43,6 +43,11 @@ function NestedList({ auth }) {
     e.stopPropagation();
   };
 
+  const assignedButtonHandler = (e) => {
+    history.push("/assigned_tickets");
+    e.stopPropagation();
+  };
+
   const dashboardButtonHandler = (e) => {
     history.push("/dashboard");
     e.stopPropagation();
@@ -72,25 +77,33 @@ function NestedList({ auth }) {
         <ListItemText primary="Tickets" />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
-      {auth.user != null && auth.user.role !== "TICKET_OPERATOR" && (
+      {auth.user != null && (
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItem
-              button
-              className={classes.nested}
-              onClick={newTicketButtonHandler}
-            >
-              <ListItemIcon>
-                <CreateOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Create New " />
-            </ListItem>
-            <ListItem button className={classes.nested}>
-              <ListItemIcon>
-                <PersonAddOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText primary="Assignned To Me " />
-            </ListItem>
+            {auth.user.role !== "DEALING_OFFICER" && (
+              <ListItem
+                button
+                className={classes.nested}
+                onClick={newTicketButtonHandler}
+              >
+                <ListItemIcon>
+                  <CreateOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Create New " />
+              </ListItem>
+            )}
+            {auth.user.role === "DEALING_OFFICER" && (
+              <ListItem
+                button
+                className={classes.nested}
+                onClick={assignedButtonHandler}
+              >
+                <ListItemIcon>
+                  <PersonAddOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Assignned To Me " />
+              </ListItem>
+            )}
             <ListItem button className={classes.nested}>
               <ListItemIcon>
                 <StarBorder />

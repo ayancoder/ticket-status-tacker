@@ -1,11 +1,18 @@
-import { REGISTER_SUCCESS, REGISTER_FAIL, LOGIN_SUCCESS, LOGIN_FAIL,
-USER_LOADED } from "../actions/types";
+import {
+  REGISTER_SUCCESS,
+  REGISTER_FAIL,
+  LOGIN_SUCCESS,
+  LOGIN_FAIL,
+  USER_LOADED,
+  FETCH_USERS_SUCCESS,
+} from "../actions/types";
 
 const initialState = {
   token: localStorage.getItem("token"),
   isAuthenticated: null,
   loading: true,
   user: null,
+  dealingOfficers: [],
 };
 
 export default function (state = initialState, action) {
@@ -17,7 +24,7 @@ export default function (state = initialState, action) {
         ...state,
         isAuthenticated: true,
         loading: false,
-        user: payload
+        user: payload,
       };
     case REGISTER_SUCCESS:
     case LOGIN_SUCCESS:
@@ -38,6 +45,12 @@ export default function (state = initialState, action) {
         isAuthenticated: false,
         loading: false,
       };
+    case FETCH_USERS_SUCCESS:
+      return {
+        ...state,
+        dealingOfficers: action.dealingOfficers,
+      };
+      break;
     default:
       return state;
   }

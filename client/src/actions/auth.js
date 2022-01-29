@@ -9,6 +9,7 @@ import {
   LOGIN_FAIL,
   USER_LOADED,
   AUTH_ERROR,
+  FETCH_USERS_SUCCESS,
   LOGOUT,
 } from "./types";
 
@@ -104,6 +105,19 @@ export const login = (password, phone) => async (dispatch) => {
   dispatch({
     type: LOGIN_FAIL,
   });
+};
+
+export const fetchAllDealingOfficer = () => async (dispatch) => {
+  try {
+    const res = await axios.get("http://143.244.131.27:5000/api/users");
+    console.log(res);
+    if (res) {
+      dispatch({
+        type: FETCH_USERS_SUCCESS,
+        dealingOfficers: res?.data,
+      });
+    }
+  } catch (e) {}
 };
 
 export const logout = () => (dispatch) => {};

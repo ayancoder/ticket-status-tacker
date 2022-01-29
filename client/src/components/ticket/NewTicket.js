@@ -11,8 +11,10 @@ import Navbar from "../dashboard/Navbar";
 import { Button, TextField } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import { tickets, addtickets } from "../../actions/ticket";
+import { tickets, addtickets, closeSnackBar } from "../../actions/ticket";
 import { connect } from "react-redux";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
 
 function Copyright() {
   return (
@@ -25,6 +27,9 @@ function Copyright() {
       {"."}
     </Typography>
   );
+}
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
 const drawerWidth = 240;
@@ -152,7 +157,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewTicket({ tickets, addtickets }) {
+function NewTicket({ tickets, addtickets, closeSnackBar, alertOpen }) {
   const classes = useStyles();
   const [isclose, setIsClose] = React.useState(0);
   const [selectedFile, setSelectedFile] = React.useState([]);
@@ -168,6 +173,15 @@ function NewTicket({ tickets, addtickets }) {
   React.useEffect(() => {
     localStorage.setItem("isclose", isclose);
   }, [isclose]);
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    alertOpen = false;
+    closeSnackBar();
+  };
 
   const onFileChange = (e) => {
     let str = "";
@@ -317,10 +331,23 @@ function NewTicket({ tickets, addtickets }) {
             </form>
             {/* Recent Tickets */}
             <Grid item xs={12}>
-              <TicketsTable withLink="newticket" />
+              <TicketsTable ticketType={"NEW"} />
             </Grid>
           </Grid>
-
+          <Snackbar
+            open={alertOpen}
+            autoHideDuration={3500}
+            onClose={handleClose}
+            style={{ width: "20rem" }}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          >
+            <Alert onClose={handleClose} severity="success">
+              Ticket Created Successfully!
+            </Alert>
+          </Snackbar>
           <Box pt={4}>
             <Copyright />
           </Box>
@@ -332,6 +359,9 @@ function NewTicket({ tickets, addtickets }) {
 
 const mapStateToProps = (state) => ({
   user: state.auth.user,
+  alertOpen: state?.ticket?.alertOpen,
 });
 
-export default connect(mapStateToProps, { tickets, addtickets })(NewTicket);
+export default connect(mapStateToProps, { tickets, addtickets, closeSnackBar })(
+  NewTicket
+);
