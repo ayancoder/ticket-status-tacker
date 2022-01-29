@@ -54,7 +54,7 @@ const upload = multer({
 
   
 router.post("/upload", auth, (req, res) => {
-  log.info("calling file upload");
+  logger.info("calling file upload");
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
