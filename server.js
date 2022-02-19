@@ -9,11 +9,10 @@ const profileRouter = require('./routes/api/profile');
 const imageRouter = require('./routes/api/image');
 const officeRouter = require('./routes/api/office');
 const reportRouter = require('./routes/api/reports')
-const { PORT, NODE_ENV, MONGO_URI } =  require('./config/config');
+const { PORT, NODE_ENV } =  require('./config/config');
 const logger = require('./config/winston');
 
 logger.info(`env ${NODE_ENV}`)
-logger.info(`db connection string ${MONGO_URI}`)
 const app = express();
 // connect to database
 connectDB();
