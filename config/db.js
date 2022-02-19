@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
-const config = require("config");
-const dbURI = config.get("mongoURI");
 const logger = require('./winston');
+const {MONGO_URI} = require('./config')
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(dbURI, {
+    await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,

@@ -10,8 +10,14 @@ To have launchd start mongodb/brew/mongodb-community now and restart at login:
 Or, if you don't want/need a background service you can just run:
   mongod --config /usr/local/etc/mongod.conf
 
+# start /stop mongo in ubuntu
+sudo systemctl status mongod
+sudo systemctl stop mongod
+sudo systemctl restart mongod
+
 # kill already running node process.
 sudo killall node 
+kill -9 $(lsof -t -i:3000)
 
 # export mongo db.
 mongodump -d <database_name> -o <directory_backup>
