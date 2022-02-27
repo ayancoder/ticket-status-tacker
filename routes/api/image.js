@@ -47,13 +47,14 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 5,
+    fileSize: 1024 * 1024 * 1024,
   },
   fileFilter: fileFilter,
 }).array('image'); 
 
   
 router.post("/upload", auth, (req, res) => {
+  logger.info("calling file upload");
   upload(req, res, function (err) {
     if (err) {
       res.status(400).json({ message: err.message });
@@ -67,8 +68,8 @@ router.post("/upload", auth, (req, res) => {
           imgFilePath.push(file.path);
         }
       });
-      //logger.info(`files  ${JSON.stringify(pdfFilePath)} ${JSON.stringify(imgFilePath)}`);
-      res.status(200)
+      logger.info('file uploaded successfully');
+      return res.status(200)
         .json({
           message: "Image Uploaded Successfully !",
           pdf: pdfFilePath,

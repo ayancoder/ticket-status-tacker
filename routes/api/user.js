@@ -13,6 +13,7 @@ const checkObjectId = require("../../middleware/checkObjectId");
 const User = require("../../models/User");
 const constants = require('../../const/constants');
 const logger = require('../../config/winston');
+const { JWT_SECRET } = require("../../config/config");
 
 // @route    GET api/user/details
 // @desc     get user details for given user id. only SUPER_ADMIN can execute it.
@@ -146,7 +147,7 @@ router.post(
 
       jwt.sign(
         payload,
-        config.get("jwtSecret"),
+        config.get(JWT_SECRET),
         { expiresIn: "5 days" },
         (err, token) => {
           if (err) throw err;
