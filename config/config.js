@@ -6,5 +6,9 @@ module.exports = {
     HOST : process.env.HOST,
     PORT : process.env.PORT,
     MONGO_URI: process.env.MONGO_URI,
-    JWT_SECRET: process.env.JWT_SECRET
+    JWT_SECRET: process.env.JWT_SECRET,
+
+    S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+    S3_SECRECT_ACCESS_KEY: process.env.S3_SECRECT_ACCESS_KEY,
+    S3_BUCKET_REGION: process.env.S3_BUCKET_REGION
 }

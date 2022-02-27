@@ -7,6 +7,7 @@ const authRouter = require('./routes/api/auth');
 const ticketRouter = require('./routes/api/ticket');
 const profileRouter = require('./routes/api/profile');
 const imageRouter = require('./routes/api/image');
+const fileUploadRouter = require('./routes/api/s3upload');
 const officeRouter = require('./routes/api/office');
 const reportRouter = require('./routes/api/reports')
 const { PORT, NODE_ENV } =  require('./config/config');
@@ -30,6 +31,8 @@ app.use('/api/profiles',profileRouter);
 app.use('/api/auth',authRouter);
 app.use('/api/tickets',ticketRouter);
 app.use('/api/images', imageRouter);
+app.use('/api/file-upload', fileUploadRouter);
+app.use('/api/reports/',reportRouter);
 app.use('/api/offices', officeRouter);
 app.use('/api/reports/',reportRouter);
 
