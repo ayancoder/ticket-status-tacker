@@ -788,7 +788,7 @@ function EditTicket({
                                   className={classes.formTypoButton}
                                   onClick={() =>
                                     window.open(
-                                      "http://143.244.131.27:5000/" + path
+                                      "http://localhost:5000/" + path
                                     )
                                   }
                                 >
@@ -820,7 +820,7 @@ function EditTicket({
                                   className={classes.formTypoButton}
                                   onClick={() =>
                                     window.open(
-                                      "http://143.244.131.27:5000/" + path
+                                      "http://localhost:5000/" + path
                                     )
                                   }
                                 >

@@ -10,8 +10,10 @@ const imageRouter = require('./routes/api/image');
 const fileUploadRouter = require('./routes/api/s3upload');
 const officeRouter = require('./routes/api/office');
 const reportRouter = require('./routes/api/reports')
-const { PORT, NODE_ENV } =  require('./config/config');
 const logger = require('./config/winston');
+const dotenv = require('dotenv');
+dotenv.config();
+const { PORT, NODE_ENV } =  require('./config/config');
 
 logger.info(`env ${NODE_ENV}`)
 const app = express();

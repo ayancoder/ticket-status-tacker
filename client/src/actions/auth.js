@@ -21,7 +21,7 @@ export const loadUser = () => async (dispatch) => {
     setAuthToken(localStorage.token);
   }
   try {
-    const res = await axios.get("http://143.244.131.27:5000/api/auth");
+    const res = await axios.get("http://localhost:5000/api/auth");
 
     dispatch({
       type: USER_LOADED,
@@ -51,7 +51,7 @@ export const register = (name, password, phone) => async (dispatch) => {
     const body = JSON.stringify(newUser);
     console.log("body", body);
     const res = await axios.post(
-      "http://143.244.131.27:5000/api/users",
+      "http://localhost:5000/api/users",
       body,
       config
     );
@@ -90,7 +90,7 @@ export const login = (password, phone) => async (dispatch) => {
 
     const body = JSON.stringify(cred);
     const res = await axios.post(
-      "http://143.244.131.27:5000/api/auth",
+      "http://localhost:5000/api/auth",
       body,
       config
     );
@@ -113,7 +113,7 @@ export const login = (password, phone) => async (dispatch) => {
 
 export const fetchAllDealingOfficer = () => async (dispatch) => {
   try {
-    const res = await axios.get("http://143.244.131.27:5000/api/users");
+    const res = await axios.get("http://localhost:5000/api/users");
     console.log(res);
     if (res) {
       dispatch({

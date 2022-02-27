@@ -180,7 +180,7 @@ function ReportGenerate({ report_url, generate_report }) {
   if (report_url !== null && report_url.filename != null && clicked === true) {
     var url = report_url.filename.filename;
     url = url.replace("/root/ticket-status-tacker", "");
-    window.open("http://143.244.131.27:5000" + url);
+    window.open("http://localhost:5000" + url);
     setClicked(false);
   }
 

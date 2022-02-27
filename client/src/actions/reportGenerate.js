@@ -23,7 +23,7 @@ export const generate_report =
       const body = JSON.stringify(NewTicket);
       console.log("body", body);
       const res = await axios.post(
-        "http://143.244.131.27:5000/api/reports",
+        "http://localhost:5000/api/reports",
         body,
         config
       );
