@@ -37,9 +37,9 @@ router.post(
         avatar: user.avatar,
 
       });
-      const filePaths = moveFiles(req.body.imageFilePath, req.body.pdfFilePath, newTicket._id);
-      newTicket.imageFilePath = filePaths.imgFiles;
-      newTicket.pdfFilePath = filePaths.pdfFiles;
+      //const filePaths = moveFiles(req.body.imageFilePath, req.body.pdfFilePath, newTicket._id);
+      newTicket.imageFilePath = req.body.imageFilePath;
+      newTicket.pdfFilePath = req.body.pdfFilePath;
       const ticket = await newTicket.save();
       console.log("ticket ", ticket);
       // update user with ticket id

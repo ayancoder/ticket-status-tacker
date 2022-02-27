@@ -1,41 +1,58 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../middleware/auth");
 const aws = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
+const moment = require('moment');
+const auth = require("../../middleware/auth");
+const User = require('../../models/User');
 const logger = require('../../config/winston');
 const { S3_ACCESS_KEY, S3_SECRECT_ACCESS_KEY, S3_BUCKET_REGION } = require('../../config/config');
 
 
-const s3 = new aws.S3();
-
-aws.config.update({
-   accessKeyId: S3_ACCESS_KEY,
+const s3Config = new aws.S3({
+  accessKeyId: S3_ACCESS_KEY,
   secretAccessKey: S3_SECRECT_ACCESS_KEY,
   region: S3_BUCKET_REGION,
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid file type, only JPEG and PNG is allowed!"), false);
-  }
-};
 
-const upload =(bucketName) => multer({
-  fileFilter,
-  storage: multerS3({
-    s3,
-    bucket: bucketName,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: "TESTING_METADATA" });
-    },
-    key: function (req, file, cb) {
-      cb(null, Date.now().toString());
-    },
-  }),
+const fileFilter = (req, file, callback) => {
+  if (file.mimetype === 'image/jpeg' ||
+    file.mimetype === 'image/png' ||
+    file.mimetype == 'application/pdf') {
+    callback(null, true);
+  } else {
+    callback(new Error("invalid file extension"), false);
+  }
+}
+
+
+const multerS3Config = (bucketName) =>  multerS3({
+  s3 : s3Config,
+  bucket: bucketName,
+  metadata: function (req, file, cb) {
+    cb(null, { fieldName: file.fieldname });
+  },
+  key: function (req, file, cb) {
+    const userId = req.user.id;
+    User.findById(userId).populate("office").then(user => {
+      const officeName = user.office.docketPrefix
+      const dateStr = moment().format('DD-MM-YYYY');
+      const dir = officeName + "/" + dateStr;
+      logger.info(`dir: ${dir}`)
+      const fullPath = dir + '/' + file.originalname; //If you want to save into a folder concat de name of the folder to the path
+      cb(null, fullPath)
+    })
+  },
+});
+
+const upload = (bucketName) => multer({
+  storage: multerS3Config(bucketName),
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 1024 * 1024 * 5 // we are allowing only 5 MB files
+  }
 });
 
   
@@ -49,8 +66,6 @@ router.post("/", auth, (req, res) => {
     } else {
       let pdfFilePath = [];
       let imgFilePath = [];
-      //console.log("request  ",req);
-      //console.log("response  ",res);
       req.files.forEach((file) => {
         if (file.mimetype == "application/pdf") {
           pdfFilePath.push(file.location);
