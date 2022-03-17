@@ -7,6 +7,8 @@ const moment = require('moment');
 const auth = require("../../middleware/auth");
 const User = require('../../models/User');
 const logger = require('../../config/winston');
+const uuid = require("uuid");
+
 const { S3_ACCESS_KEY, S3_SECRECT_ACCESS_KEY, S3_BUCKET_REGION } = require('../../config/config');
 
 
@@ -41,7 +43,7 @@ const multerS3Config = (bucketName) =>  multerS3({
       const dateStr = moment().format('DD-MM-YYYY');
       const dir = officeName + "/" + dateStr;
       logger.info(`dir: ${dir}`)
-      const fullPath = dir + '/' + file.originalname; //If you want to save into a folder concat de name of the folder to the path
+      const fullPath = dir + '/' + uuid.v4() + file.originalname; //If you want to save into a folder concat de name of the folder to the path
       cb(null, fullPath)
     })
   },
@@ -56,9 +58,9 @@ const upload = (bucketName) => multer({
 });
 
   
-router.post("/", auth, (req, res) => {
+router.post("/upload", auth, (req, res) => {
   logger.info("calling file upload");
-  const uploadFiles = upload("pur-bdo-unique-string-office").array('file'); 
+  const uploadFiles = upload("pur-bdo-unique-string-office").array('image'); 
 
   uploadFiles(req, res, function (err) {
     if (err) {
