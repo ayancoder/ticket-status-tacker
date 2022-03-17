@@ -147,7 +147,7 @@ router.post(
 
       jwt.sign(
         payload,
-        config.get(JWT_SECRET),
+        JWT_SECRET,
         { expiresIn: "5 days" },
         (err, token) => {
           if (err) throw err;
