@@ -5,7 +5,7 @@ import {
   GET_POSTS,
   GET_POST,
   ADD_POST,
-  GET_,
+  GET_COUNT,
   ALERT_OPEN,
   ALERT_CLOSE,
   FETCH_COMMENTS,
