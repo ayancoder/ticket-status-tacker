@@ -788,7 +788,7 @@ function EditTicket({
                                   className={classes.formTypoButton}
                                   onClick={() =>
                                     window.open(
-                                       `http://${process.env.SERVER}:5000/` + path
+                                       `http://${process.env.REACT_APP_SERVER}:5000/` + path
                                     )
                                   }
                                 >
@@ -820,7 +820,7 @@ function EditTicket({
                                   className={classes.formTypoButton}
                                   onClick={() =>
                                     window.open(
-                                      `http://${process.env.SERVER}:5000/` + path
+                                      `http://${process.env.REACT_APP_SERVER}:5000/` + path
                                     )
                                   }
                                 >
