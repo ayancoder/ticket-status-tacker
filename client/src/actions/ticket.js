@@ -19,7 +19,7 @@ export const tickets =
         setAuthToken(localStorage.token);
       }
       var fetchTicket =
-        "http://localhost:5000/api/tickets?state=" +
+        "http://{process.env.SERVER}:5000/api/tickets?state=" +
         state +
         "&page=" +
         page +
@@ -56,7 +56,7 @@ export const getTicketComments = (ticketId) => async (dispatch) => {
       setAuthToken(localStorage.token);
     }
     const res = await axios.get(
-      "http://localhost:5000/api/tickets/ticket_id/" + ticketId
+      "http://{process.env.SERVER}:5000/api/tickets/ticket_id/" + ticketId
     );
     if (res) {
       console.log(res.data.comments);
@@ -89,7 +89,7 @@ export const editTickets =
         };
         body = JSON.stringify(body);
         res = await axios.put(
-          "http://localhost:5000/api/tickets/assign/" + ticketId,
+          "http://{process.env.SERVER}:5000/api/tickets/assign/" + ticketId,
           body,
           config
         );
@@ -104,7 +104,7 @@ export const editTickets =
         };
         dealBody = JSON.stringify(dealBody);
         res = await axios.put(
-          "http://localhost:5000/api/tickets/" + ticketId,
+          "http://{process.env.SERVER}:5000/api/tickets/" + ticketId,
           dealBody,
           config
         );
@@ -115,7 +115,7 @@ export const editTickets =
 
         body = JSON.stringify(body);
         const resComment = await axios.post(
-          "http://localhost:5000/api/tickets/comment/" + ticketId,
+          "http://{process.env.SERVER}:5000/api/tickets/comment/" + ticketId,
           body,
           config
         );
@@ -142,7 +142,7 @@ export const addComments = (ticketId, commentText) => async (dispatch) => {
     };
     body = JSON.stringify(body);
     const res = await axios.post(
-      "http://localhost:5000/api/tickets/comment/" + ticketId,
+      "http://{process.env.SERVER}:5000/api/tickets/comment/" + ticketId,
       body,
       config
     );
@@ -157,7 +157,7 @@ export const getcountticketstypes = () => async (dispatch) => {
     if (localStorage.token) {
       setAuthToken(localStorage.token);
     }
-    const res = await axios.get("http://localhost:5000/api/tickets/count");
+    const res = await axios.get("http://{process.env.SERVER}:5000/api/tickets/count");
     if (res) {
       var newTickets =
         res?.data?.newTicket === undefined ? 0 : res?.data?.newTicket;
@@ -202,7 +202,7 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
       },
     };
     const res_upload = await axios.post(
-      "http://localhost:5000/api/images/upload",
+      `http://${process.env.SERVER}:5000/api/images/upload`,
       data,
       config
     );
@@ -226,7 +226,7 @@ export const addtickets = (subject, source, files) => async (dispatch) => {
     const body = JSON.stringify(NewTicket);
     console.log("body", body);
     const res = await axios.post(
-      "http://localhost:5000/api/tickets",
+      `http://${process.env.SERVER}:5000/api/tickets`,
       body,
       config_ticket
     );
