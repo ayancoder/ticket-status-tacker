@@ -364,7 +364,10 @@ let getOfficeId = async (userId) => {
   const user = await User.findById(userId).select(
     "-password  -createdTickets -assignedTickets -inprogressTickets -resolvedTickets -concludedTickets"
   );
-  return user.office;
+  
+  if(user){
+   return user.office;
+  }
 };
 
 const getQueryOptions = (req) => {
