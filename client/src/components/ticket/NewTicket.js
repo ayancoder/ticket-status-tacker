@@ -300,7 +300,7 @@ function NewTicket({ tickets, addtickets, closeSnackBar, alertOpen }) {
                           color="primary"
                           component="label"
                         >
-                          To Upload
+                          Attachment
                           <input
                             type="file"
                             style={{ display: "none" }}

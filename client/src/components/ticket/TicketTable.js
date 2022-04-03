@@ -125,7 +125,7 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
         });
       }
     }
-  }, [newTickets]);
+  }, [newTickets.tickets]);
 
   const onSubjectChange = (e) => {
     setSubject(e.target.value);
