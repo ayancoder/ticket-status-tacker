@@ -786,11 +786,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() =>
-                                    window.open(
-                                       `http://${process.env.REACT_APP_SERVER}:5000/` + path
-                                    )
-                                  }
+                                  onClick={() => window.open(path)}
                                 >
                                   <ImageIcon
                                     fontSize="large"
@@ -818,11 +814,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() =>
-                                    window.open(
-                                      `http://${process.env.REACT_APP_SERVER}:5000/` + path
-                                    )
-                                  }
+                                  onClick={() => window.open(path)}
                                 >
                                   <PictureAsPdfIcon
                                     fontSize="large"
