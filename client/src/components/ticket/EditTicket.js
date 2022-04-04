@@ -416,6 +416,59 @@ function EditTicket({
                     className={classes.formcontainer}
                     align="center"
                   >
+                    <Grid container>
+                      <Grid item xs={12} md={6} lg={4}>
+                        <Typography variant="h6" className={classes.formTypo}>
+                          <b>Subject </b>
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6} lg={6}>
+                        <TextField
+                          disabled
+                          id="standard-textarea"
+                          multiline
+                          value={subject}
+                          InputProps={{
+                            readOnly: true,
+                          }}
+                          style={{ textAlign: "left", width: "20rem" }}
+                          onChange={onSubjectChange}
+                        />
+                      </Grid>
+                    </Grid>
+                    <Grid container className={classes.descrptioncontainer}>
+                      <Grid item xs={12} md={6} lg={4}>
+                        <Typography variant="h6" className={classes.formTypo}>
+                          <b>Source </b>
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6} lg={6}>
+                        <Select
+                          disabled
+                          labelId="simple-select-label-source"
+                          id="simple-select-source"
+                          value={source}
+                          onChange={onSourceChange}
+                          inputProps={{
+                            readOnly: true,
+                          }}
+                          style={{ width: "20rem" }}
+                        >
+                          <MenuItem value={"State"}>State</MenuItem>
+                          <MenuItem value={"District"}>District</MenuItem>
+                          <MenuItem value={"Sub-Division"}>
+                            Sub-Division
+                          </MenuItem>
+                          <MenuItem value={"Gram Panchayat"}>
+                            Gram Panchayat
+                          </MenuItem>
+                          <MenuItem value={"Other Block Offices"}>
+                            Other Block Offices
+                          </MenuItem>
+                          <MenuItem value={"Others"}>Others</MenuItem>
+                        </Select>
+                      </Grid>
+                    </Grid>
                     {user?.role !== "CC_OFFICER" &&
                       ticket_details.state !== "NEW" && (
                         <Grid container className={classes.descrptioncontainer}>
@@ -548,57 +601,6 @@ function EditTicket({
                         </Grid>
                       </Grid>
                     )}
-                    <Grid container>
-                      <Grid item xs={12} md={6} lg={4}>
-                        <Typography variant="h6" className={classes.formTypo}>
-                          <b>Subject </b>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} md={6} lg={6}>
-                        <TextField
-                          id="standard-textarea"
-                          multiline
-                          value={subject}
-                          InputProps={{
-                            readOnly: true,
-                          }}
-                          style={{ textAlign: "left", width: "20rem" }}
-                          onChange={onSubjectChange}
-                        />
-                      </Grid>
-                    </Grid>
-                    <Grid container className={classes.descrptioncontainer}>
-                      <Grid item xs={12} md={6} lg={4}>
-                        <Typography variant="h6" className={classes.formTypo}>
-                          <b>Source </b>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} md={6} lg={6}>
-                        <Select
-                          labelId="simple-select-label-source"
-                          id="simple-select-source"
-                          value={source}
-                          onChange={onSourceChange}
-                          inputProps={{
-                            readOnly: true,
-                          }}
-                          style={{ width: "20rem" }}
-                        >
-                          <MenuItem value={"State"}>State</MenuItem>
-                          <MenuItem value={"District"}>District</MenuItem>
-                          <MenuItem value={"Sub-Division"}>
-                            Sub-Division
-                          </MenuItem>
-                          <MenuItem value={"Gram Panchayat"}>
-                            Gram Panchayat
-                          </MenuItem>
-                          <MenuItem value={"Other Block Offices"}>
-                            Other Block Offices
-                          </MenuItem>
-                          <MenuItem value={"Others"}>Others</MenuItem>
-                        </Select>
-                      </Grid>
-                    </Grid>
                     {user?.role === "BDO" && (
                       <Grid container className={classes.descrptioncontainer}>
                         <Grid item xs={12} md={6} lg={4}>
