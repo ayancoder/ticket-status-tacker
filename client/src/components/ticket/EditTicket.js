@@ -806,7 +806,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() => viewFile(path)}
+                                  onClick={() => window.open(path)}
                                 >
                                   <ImageIcon
                                     fontSize="large"
@@ -834,7 +834,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() => viewFile(path)}
+                                  onClick={() => window.open(path)}
                                 >
                                   <PictureAsPdfIcon
                                     fontSize="large"
