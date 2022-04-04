@@ -23,7 +23,7 @@ export const generate_report =
       const body = JSON.stringify(NewTicket);
       console.log("body", body);
       const res = await axios.post(
-        `http://${process.env.REACT_APP_SERVER}:5000/`,
+        `http://${process.env.REACT_APP_SERVER}:5000/api/reports`,
         body,
         config
       );

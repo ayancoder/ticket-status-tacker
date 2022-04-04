@@ -21,7 +21,9 @@ export const loadUser = () => async (dispatch) => {
     setAuthToken(localStorage.token);
   }
   try {
-    const res = await axios.get(`http://${process.env.REACT_APP_SERVER}:5000/api/auth`);
+    const res = await axios.get(
+      `http://${process.env.REACT_APP_SERVER}:5000/api/auth`
+    );
 
     dispatch({
       type: USER_LOADED,
@@ -113,7 +115,9 @@ export const login = (password, phone) => async (dispatch) => {
 
 export const fetchAllDealingOfficer = () => async (dispatch) => {
   try {
-    const res = await axios.get(`http://${process.env.REACT_APP_SERVER}:5000/api/users`);
+    const res = await axios.get(
+      `http://${process.env.REACT_APP_SERVER}:5000/api/users?role=DEALING_OFFICER`
+    );
     console.log(res);
     if (res) {
       dispatch({

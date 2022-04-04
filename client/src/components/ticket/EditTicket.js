@@ -363,6 +363,24 @@ function EditTicket({
     }
   };
 
+  const viewFile = async (url) => {
+    console.log(url);
+    fetch(url, {
+      method: "GET", // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        "response-content-type": "application/pdf",
+      },
+    })
+      .then((response) => response.blob())
+      .then((blob) => {
+        var _url = window.URL.createObjectURL(blob);
+        window.open(_url, "_blank").focus();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className={classes.root}>
       <Navbar />
@@ -786,7 +804,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() => window.open(path)}
+                                  onClick={() => viewFile(path)}
                                 >
                                   <ImageIcon
                                     fontSize="large"
@@ -814,7 +832,7 @@ function EditTicket({
                                 <Button
                                   variant="contained"
                                   className={classes.formTypoButton}
-                                  onClick={() => window.open(path)}
+                                  onClick={() => viewFile(path)}
                                 >
                                   <PictureAsPdfIcon
                                     fontSize="large"
