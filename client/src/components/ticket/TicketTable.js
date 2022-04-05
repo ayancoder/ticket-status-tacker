@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import SearchIcon from "@material-ui/icons/Search";
 import { Button } from "@material-ui/core";
+import CancelIcon from "@material-ui/icons/Cancel";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -37,6 +38,7 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
   const [newtickets, setTickets] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [subject, setSubject] = useState("");
+  const [searchEnabled, setSearchEnabled] = useState(false);
 
   const observer = useRef();
   const lastTicketElementRef = useCallback(
@@ -98,7 +100,7 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
       if (subject !== "") {
         setSubject("");
         setTickets(newTickets.tickets.tickets);
-      } else {
+      } else if (searchEnabled === false) {
         newTickets.tickets.tickets.map((ticket) => {
           setTickets((prevtickets) => {
             var flag = true;
@@ -128,12 +130,17 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
   }, [newTickets.tickets]);
 
   const onSubjectChange = (e) => {
-    setSubject(e.target.value);
+    if (e.target.value.indexOf("\n") !== -1) {
+      onClickSubmitSubject(e);
+    } else {
+      setSubject(e.target.value);
+    }
   };
 
   const onClickSubmitSubject = (e) => {
     if (user && user.role !== "DEALING_OFFICER") {
       tickets(ticketType !== null ? ticketType : "NEW", 1, 15, null, subject);
+      setSearchEnabled(true);
     } else {
       tickets(
         ticketType !== null ? ticketType : "NEW",
@@ -146,22 +153,44 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
     setPageNumber(1);
     // setSubject("");
   };
+
+  const onClickCancel = (e) => {
+    if (user && user.role !== "DEALING_OFFICER") {
+      tickets(ticketType !== null ? ticketType : "NEW", pageNumber, 15);
+    } else {
+      tickets(
+        ticketType !== null ? ticketType : "NEW",
+        pageNumber,
+        15,
+        user == null ? null : user._id
+      );
+    }
+    setPageNumber(1);
+    setSearchEnabled(false);
+    // setSubject("");
+  };
   return (
     <div>
       <div style={{ display: "flex", marginBottom: "1.5rem" }}>
         <TextareaAutosize
-          placeholder="Search With Subject"
+          placeholder="Search With Subject..."
           value={subject}
           onChange={onSubjectChange}
           style={{ height: "1.5rem", width: 300, marginLeft: "28rem" }}
         />
-        <Button
-          style={{ height: "1.5rem" }}
-          disabled={!subject}
-          onClick={onClickSubmitSubject}
-        >
-          <SearchIcon />
-        </Button>
+        {searchEnabled === false ? (
+          <Button
+            style={{ height: "1.5rem" }}
+            disabled={!subject}
+            onClick={onClickSubmitSubject}
+          >
+            <SearchIcon />
+          </Button>
+        ) : (
+          <Button style={{ height: "1.5rem" }} onClick={onClickCancel}>
+            <CancelIcon />
+          </Button>
+        )}
       </div>
       {newtickets.length !== 0 && (
         <TableContainer component={Paper}>
