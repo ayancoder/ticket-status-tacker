@@ -59,6 +59,8 @@ export default function (state = initialState, action) {
       return {
         ...state,
         isAuthenticated: false,
+        token: false,
+        user: null,
       };
     case LOGIN_ALERT_OPEN:
       return {
