@@ -16,6 +16,9 @@ import { useHistory } from "react-router-dom";
 import { fetchAllDealingOfficer } from "../../actions/auth";
 import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
 import ImageIcon from "@material-ui/icons/Image";
+import AttachFileIcon from "@material-ui/icons/AttachFile";
+import EditIcon from "@material-ui/icons/Edit";
+
 import {
   editTickets,
   getTicketComments,
@@ -129,7 +132,18 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(1),
     paddingLeft: theme.spacing(1),
   },
+  ticketTypo2: {
+    color: theme.palette.secondary.main,
+    paddingTop: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+  },
   formTypo: {
+    color: theme.palette.primary.main,
+    paddingTop: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+    marginTop: theme.spacing(1),
+  },
+  formTypoAttachment: {
     color: theme.palette.primary.main,
     paddingTop: theme.spacing(1),
     paddingLeft: theme.spacing(1),
@@ -396,13 +410,66 @@ function EditTicket({
                   ref={myRef}
                 >
                   <>
-                    <b>{editState === false ? "View" : "Edit"} Ticket ID -</b>
-                    <b style={{ marginLeft: "4rem" }}>
-                      <u>{"   " + ticket_details.docketId}</u>
+                    <b>
+                      {editState === false ? "Viewing" : "Editing"} Ticket ID :
+                    </b>
+                    <b
+                      style={{ marginLeft: "2rem" }}
+                      className={classes.ticketTypo2}
+                    >
+                      {"   " + ticket_details.docketId}
                     </b>
                   </>
                 </Typography>
               </Paper>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              lg={4}
+              style={{ marginTop: "-4.5rem", marginLeft: "33rem" }}
+            >
+              {editState === true ? (
+                <Grid container className={classes.submitcontainer}>
+                  <Grid item xs={12} md={6} lg={4}>
+                    <Button
+                      type="submit"
+                      variant="outlined"
+                      color="primary"
+                      disabled={!states || !comment}
+                    >
+                      Submit
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} md={6} lg={4}>
+                    <Button
+                      type="submit"
+                      variant="outlined"
+                      style={{ marginLeft: "2rem" }}
+                      color="secondary"
+                      onClick={() => seteditState(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </Grid>
+                </Grid>
+              ) : (
+                <Grid container className={classes.submitcontainer}>
+                  <Grid item xs={12} md={6} lg={4}>
+                    <Button
+                      type="submit"
+                      variant="outlined"
+                      color="secondary"
+                      id="Edit1"
+                      style={{ marginLeft: "1rem", width: "10rem" }}
+                      onClick={() => seteditState(true)}
+                    >
+                      <EditIcon style={{ marginLeft: "-1rem" }} /> Edit Ticket
+                    </Button>
+                  </Grid>
+                </Grid>
+              )}
             </Grid>
             <form
               className={classes.form}
@@ -656,15 +723,6 @@ function EditTicket({
                         <>
                           {user?.role !== "CC_OFFICER" && (
                             <>
-                              <Divider style={{ marginTop: "2rem" }} />
-                              <Typography
-                                variant="h4"
-                                className={classes.formTypo}
-                              >
-                                <b>
-                                  <u>Comments </u>{" "}
-                                </b>
-                              </Typography>
                               <Grid
                                 container
                                 className={classes.descrptioncontainer}
@@ -680,11 +738,12 @@ function EditTicket({
                                     aria-label="empty textarea"
                                     onChange={onCommentChange}
                                     value={comment}
-                                    placeholder="Enter you Comment Here"
+                                    placeholder=" Add a comment..."
                                     style={{
-                                      fontSize: 19,
+                                      fontSize: 15,
+                                      marginLeft: "3rem",
                                       width: "31rem",
-                                      height: "3rem",
+                                      height: "5rem",
                                       marginTop: "1rem",
                                     }}
                                   />
@@ -707,7 +766,7 @@ function EditTicket({
                                         onClick={onSendClick}
                                         endIcon={<SendIcon />}
                                       >
-                                        Send
+                                        Post
                                       </Button>
                                     </Grid>
                                   )}
@@ -783,11 +842,10 @@ function EditTicket({
                               <Divider style={{ marginTop: "2rem" }} />
                               <Typography
                                 variant="h4"
-                                className={classes.formTypo}
+                                className={classes.formTypoAttachment}
                               >
-                                <b>
-                                  <u>Attachments</u>{" "}
-                                </b>
+                                <AttachFileIcon />
+                                <b>Attached Files</b>
                               </Typography>
                             </>
                           )}
@@ -866,7 +924,7 @@ function EditTicket({
                             type="submit"
                             variant="outlined"
                             style={{ marginLeft: "6rem" }}
-                            color="primary"
+                            color="secondary"
                             onClick={() => seteditState(false)}
                           >
                             Cancel
@@ -880,9 +938,13 @@ function EditTicket({
                             type="submit"
                             variant="outlined"
                             color="primary"
-                            style={{ marginLeft: "16rem" }}
+                            style={{
+                              marginLeft: "16rem",
+                              width: "10rem",
+                            }}
                           >
-                            Edit
+                            <EditIcon style={{ marginLeft: "-1rem" }} /> Edit
+                            Ticket
                           </Button>
                         </Grid>
                       </Grid>
