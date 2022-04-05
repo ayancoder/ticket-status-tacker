@@ -15,7 +15,7 @@ import { tickets, addtickets, closeSnackBar } from "../../actions/ticket";
 import { connect } from "react-redux";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
-
+import DeleteIcon from "@material-ui/icons/Delete";
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -186,15 +186,13 @@ function NewTicket({ tickets, addtickets, closeSnackBar, alertOpen }) {
   const onFileChange = (e) => {
     let str = "";
     var selected = [];
-    for (let i = 0; i <= selectedFile.length; i++) {
-      selectedFile.pop();
-    }
+    // for (let i = 0; i <= selectedFile.length; i++) {
+    //   selectedFile.pop();
+    // }
     for (let i = 0; i < e.target.files.length; i++) {
       str += e.target.files[i].name + ",";
       console.log(selectedFile);
-      selected = selectedFile;
-      selected.push(e.target.files[i]);
-      setSelectedFile(selected);
+      setSelectedFile([...selectedFile, e.target.files[i]]);
     }
     setFileName(str);
     console.log(selectedFile);
@@ -309,7 +307,50 @@ function NewTicket({ tickets, addtickets, closeSnackBar, alertOpen }) {
                           />
                         </Button>
                         &nbsp;&nbsp;
-                        {fileName === null ? "Select File" : fileName}
+                        {selectedFile.length === 0
+                          ? "Select File"
+                          : selectedFile.map((file) => {
+                              return (
+                                <Paper>
+                                  <Grid
+                                    container
+                                    className={classes.descrptioncontainer}
+                                  >
+                                    <Grid item xs={12} md={6} lg={6}>
+                                      <Typography
+                                        variant="subtitle1"
+                                        className={classes.ticketTypography}
+                                      >
+                                        <b>{file?.name}</b>
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={12} md={6} lg={6}>
+                                      <Button
+                                        onClick={() => {
+                                          console.log(file);
+                                          if (selectedFile.length === 1) {
+                                            setSelectedFile([]);
+                                          } else {
+                                            var filesArray = selectedFile;
+                                            var index =
+                                              filesArray.indexOf(file);
+                                            if (index !== -1) {
+                                              filesArray.splice(index, 1);
+                                            }
+                                            setSelectedFile(filesArray);
+                                            setFileName("Name" + file.name);
+                                          }
+                                        }}
+                                      >
+                                        <DeleteIcon
+                                          style={{ marginTop: "0.5rem" }}
+                                        ></DeleteIcon>
+                                      </Button>
+                                    </Grid>
+                                  </Grid>
+                                </Paper>
+                              );
+                            })}
                       </Grid>
                     </Grid>
                     <Grid container className={classes.submitcontainer}>
