@@ -168,7 +168,7 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
           <Table className={classes.table} aria-label="custom pagination table">
             <TableHead>
               <TableRow>
-                <StyledTableCell>Id</StyledTableCell>
+                <StyledTableCell>Docket Number</StyledTableCell>
                 <StyledTableCell align="left">Subject</StyledTableCell>
                 <StyledTableCell align="left">Created by</StyledTableCell>
                 <StyledTableCell align="left">Created Date</StyledTableCell>
@@ -190,7 +190,14 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                 newtickets.map((ticket, index) => {
                   if (newtickets.length === index + 1) {
                     return (
-                      <TableRow ref={lastTicketElementRef}>
+                      <TableRow
+                        ref={lastTicketElementRef}
+                        style={{
+                          backgroundColor:
+                            index % 2 === 0 ? "#eeeeee" : "#ffffff",
+                          color: "#000000",
+                        }}
+                      >
                         <StyledTableCell align="left">
                           <Link
                             to={{
@@ -208,7 +215,10 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                           {ticket.creator.name}
                         </StyledTableCell>
                         <StyledTableCell align="left">
-                          {ticket.createDate}
+                          {ticket.createDate.substring(
+                            0,
+                            ticket.createDate.indexOf("T")
+                          )}
                         </StyledTableCell>
                         <StyledTableCell align="center">
                           {ticket.state}
@@ -217,7 +227,10 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                           <StyledTableCell align="center">
                             {ticket.assignDate == null
                               ? null
-                              : ticket.assignDate}
+                              : ticket.assignDate.substring(
+                                  0,
+                                  ticket.createDate.indexOf("T")
+                                )}
                           </StyledTableCell>
                         ) : (
                           <></>
@@ -235,7 +248,13 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                     );
                   } else {
                     return (
-                      <TableRow>
+                      <TableRow
+                        style={{
+                          font: "serif",
+                          backgroundColor:
+                            index % 2 === 0 ? "#eeeeee" : "#ffffff",
+                        }}
+                      >
                         <StyledTableCell align="left">
                           <Link
                             to={{
@@ -253,7 +272,10 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                           {ticket.creator.name}
                         </StyledTableCell>
                         <StyledTableCell align="left">
-                          {ticket.createDate}
+                          {ticket.createDate.substring(
+                            0,
+                            ticket.createDate.indexOf("T")
+                          )}
                         </StyledTableCell>
                         <StyledTableCell align="left">
                           {ticket.state}
@@ -262,7 +284,10 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                           <StyledTableCell align="center">
                             {ticket.assignDate == null
                               ? null
-                              : ticket.assignDate}
+                              : ticket.assignDate.substring(
+                                  0,
+                                  ticket.createDate.indexOf("T")
+                                )}
                           </StyledTableCell>
                         ) : (
                           <></>
