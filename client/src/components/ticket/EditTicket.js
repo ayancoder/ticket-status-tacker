@@ -757,7 +757,7 @@ function EditTicket({
                                       <Button
                                         disabled={!comment}
                                         style={{
-                                          marginLeft: "27rem",
+                                          marginLeft: "30rem",
                                           marginTop: "2.2rem",
                                           backgroundColor: "#42a5f5",
                                           color: "#e3f2fd",
