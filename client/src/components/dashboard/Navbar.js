@@ -152,8 +152,9 @@ function Navbar({ logout }) {
             <Tooltip title="Logout">
               <ExitToApp
                 onClick={() => {
-                  localStorage.clear();
+                  history.push("/dashboard");
                   logout();
+                  localStorage.clear();
                 }}
               />
             </Tooltip>
