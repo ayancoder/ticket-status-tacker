@@ -92,8 +92,15 @@ const Login = ({
 
   const [showPassword, setShowPassword] = React.useState(false);
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = (e) => {
+    if (e.target.name === "phone") {
+      if (e.target.value.length <= 10) {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      }
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
