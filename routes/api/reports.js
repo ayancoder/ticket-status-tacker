@@ -2,9 +2,19 @@ const express = require('express');
 const router = express.Router();
 var pdf = require("pdf-creator-node")
 var fs = require('fs') 
+const aws = require('aws-sdk');
 const auth = require("../../middleware/auth");
 const Ticket = require("../../models/Ticket");
 const logger = require('../../config/winston');
+
+const { S3_ACCESS_KEY, S3_SECRECT_ACCESS_KEY, S3_BUCKET_REGION } = require('../../config/config');
+
+
+const s3Config = new aws.S3({
+  accessKeyId: S3_ACCESS_KEY,
+  secretAccessKey: S3_SECRECT_ACCESS_KEY,
+  region: S3_BUCKET_REGION,
+});
 
 router.post("/", auth, async (req, res) => {
     const user = await getUser(req.user.id)
@@ -12,7 +22,24 @@ router.post("/", auth, async (req, res) => {
     const options = await getQueryOptions(req);
     await Ticket.paginate(query, options)
     .then((data) => {   
-        generatePfd(data.docs, user, res)    
+      const filePath = generatePfd(data.docs, user, res)
+      logger.info('report generated file path')
+      logger.info(filePath)
+      const fileContent = fs.readFileSync(filePath)
+
+      const params = {
+        Bucket: 'pur-bdo-unique-string-office',
+        Key: filePath,
+        Body: fileContent
+      }
+
+      s3Config.upload(params, (err, data) => {
+        if (err) {
+          return res.status(500).send("could not upload to s3");
+        }
+        return res.status(200).send(data.Location);
+      })
+
     })
     .catch((err) => {
       logger.info("error in fetching data", err);
@@ -70,7 +97,7 @@ const getUser = async (userId) => {
   return user;
 };
 
-const generatePfd = (tickets, user, response) => {
+const generatePfd = (tickets, user) => {
   // Read HTML Template
   const html = fs.readFileSync("./html-template/template.html", "utf8");
 
@@ -104,7 +131,7 @@ const generatePfd = (tickets, user, response) => {
 
   pdf.create(document, options)
     .then((res) => {
-        return response.status(200).send(res)
+        return res;
     })
     .catch((error) => {
       logger.error(error.message);
