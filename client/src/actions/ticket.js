@@ -26,7 +26,7 @@ export const tickets =
         "&limit=" +
         limit;
       if (assign != null) {
-        fetchTicket = fetchTicket + "&assign=" + assign;
+        fetchTicket = fetchTicket + "&assignedTo=" + assign;
       }
       if (subject != null) {
         fetchTicket = fetchTicket + "&subject=" + subject;
@@ -56,7 +56,8 @@ export const getTicketComments = (ticketId) => async (dispatch) => {
       setAuthToken(localStorage.token);
     }
     const res = await axios.get(
-      `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/ticket_id/` + ticketId
+      `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/ticket_id/` +
+        ticketId
     );
     if (res) {
       console.log(res.data.comments);
@@ -89,7 +90,8 @@ export const editTickets =
         };
         body = JSON.stringify(body);
         res = await axios.put(
-          `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/assign/` + ticketId,
+          `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/assign/` +
+            ticketId,
           body,
           config
         );
@@ -115,7 +117,8 @@ export const editTickets =
 
         body = JSON.stringify(body);
         const resComment = await axios.post(
-          `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/comment/` + ticketId,
+          `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/comment/` +
+            ticketId,
           body,
           config
         );
@@ -142,7 +145,8 @@ export const addComments = (ticketId, commentText) => async (dispatch) => {
     };
     body = JSON.stringify(body);
     const res = await axios.post(
-      `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/comment/` + ticketId,
+      `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/comment/` +
+        ticketId,
       body,
       config
     );
@@ -157,7 +161,9 @@ export const getcountticketstypes = () => async (dispatch) => {
     if (localStorage.token) {
       setAuthToken(localStorage.token);
     }
-    const res = await axios.get(`http://${process.env.REACT_APP_SERVER}:5000/api/tickets/count`);
+    const res = await axios.get(
+      `http://${process.env.REACT_APP_SERVER}:5000/api/tickets/count`
+    );
     if (res) {
       var newTickets =
         res?.data?.newTicket === undefined ? 0 : res?.data?.newTicket;
