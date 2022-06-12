@@ -332,7 +332,7 @@ router.get("/", auth, async (req, res) => {
 
 // create query object to get data from data base.
 let queryParams = async (req) => {
-  const assignedId = req.query.assign;
+  const assignedId = req.query.assignedTo;
   const creatorId = req.query.creator;
   const docketId = req.query.docketId;
   const subject = req.query.subject;

@@ -22,23 +22,8 @@ router.post("/", auth, async (req, res) => {
     const options = await getQueryOptions(req);
     await Ticket.paginate(query, options)
     .then((data) => {   
-      const filePath = generatePfd(data.docs, user, res)
-      logger.info('report generated file path')
-      logger.info(filePath)
-      const fileContent = fs.readFileSync(filePath)
 
-      const params = {
-        Bucket: 'pur-bdo-unique-string-office',
-        Key: filePath,
-        Body: fileContent
-      }
-
-      s3Config.upload(params, (err, data) => {
-        if (err) {
-          return res.status(500).send("could not upload to s3");
-        }
-        return res.status(200).send(data.Location);
-      })
+      generatePfd(data.docs, user, res)
 
     })
     .catch((err) => {
@@ -97,7 +82,7 @@ const getUser = async (userId) => {
   return user;
 };
 
-const generatePfd = (tickets, user) => {
+const generatePfd = (tickets, user, response) => {
   // Read HTML Template
   const html = fs.readFileSync("./html-template/template.html", "utf8");
 
@@ -131,7 +116,23 @@ const generatePfd = (tickets, user) => {
 
   pdf.create(document, options)
     .then((res) => {
-        return res;
+      
+        logger.info('report generated file path')
+        logger.info(res.filename)
+        const fileContent = fs.readFileSync(res.filename)
+  
+        const params = {
+          Bucket: 'pur-bdo-unique-string-office',
+          Key: res.filename,
+          Body: fileContent
+        }
+  
+        s3Config.upload(params, (err, data) => {
+          if (err) {
+            return response.status(500).send("could not upload to s3");
+          }
+          return response.status(200).send(data.Location);
+        })
     })
     .catch((error) => {
       logger.error(error.message);
