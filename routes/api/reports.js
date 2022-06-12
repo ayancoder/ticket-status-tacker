@@ -82,7 +82,7 @@ const getUser = async (userId) => {
   return user;
 };
 
-const generatePfd = (tickets, user, res) => {
+const generatePfd = (tickets, user, response) => {
   // Read HTML Template
   const html = fs.readFileSync("./html-template/template.html", "utf8");
 
@@ -118,20 +118,20 @@ const generatePfd = (tickets, user, res) => {
     .then((res) => {
       
         logger.info('report generated file path')
-        logger.info(res)
-        const fileContent = fs.readFileSync(res)
+        logger.info(res.filename)
+        const fileContent = fs.readFileSync(res.filename)
   
         const params = {
           Bucket: 'pur-bdo-unique-string-office',
-          Key: res,
+          Key: res.filename,
           Body: fileContent
         }
   
         s3Config.upload(params, (err, data) => {
           if (err) {
-            return res.status(500).send("could not upload to s3");
+            return response.status(500).send("could not upload to s3");
           }
-          return res.status(200).send(data.Location);
+          return response.status(200).send(data.Location);
         })
     })
     .catch((error) => {
