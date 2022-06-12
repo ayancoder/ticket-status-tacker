@@ -22,7 +22,7 @@ router.post("/", auth, async (req, res) => {
     const options = await getQueryOptions(req);
     await Ticket.paginate(query, options)
     .then((data) => {   
-      const filePath = generatePfd(data.docs, user, res)
+      const filePath = generatePfd(data.docs, user)
       logger.info('report generated file path')
       logger.info(filePath)
       const fileContent = fs.readFileSync(filePath)
