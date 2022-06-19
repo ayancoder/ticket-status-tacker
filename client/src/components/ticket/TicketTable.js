@@ -56,8 +56,16 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
   );
 
   React.useEffect(() => {
-    if (user && user.role !== "DEALING_OFFICER") {
+    if (user && user.role === "BDO") {
       tickets(ticketType !== null ? ticketType : "NEW", pageNumber, 15);
+    } else if (user && user.role === "CC_OFFICER") {
+      console.log("CC_OFFICE new ticket");
+      tickets(
+        ticketType !== null ? ticketType : "NEW",
+        pageNumber,
+        15,
+        user == null ? null : user._id + "Creator"
+      );
     } else {
       tickets(
         ticketType !== null ? ticketType : "NEW",
@@ -72,8 +80,19 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
     console.log(ticketType);
     setPageNumber(1);
     setTickets([]);
-    if (user && user.role !== "DEALING_OFFICER") {
+    if (user == null) {
+      window.location.reload();
+    }
+    if (user && user.role === "BDO") {
       tickets(ticketType !== null ? ticketType : "NEW", pageNumber, 15);
+    } else if (user && user.role === "CC_OFFICER") {
+      console.log("CC_OFFICE new ticket");
+      tickets(
+        ticketType !== null ? ticketType : "NEW",
+        pageNumber,
+        15,
+        user == null ? null : user._id + "Creator"
+      );
     } else {
       tickets(
         ticketType !== null ? ticketType : "NEW",
@@ -138,9 +157,17 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
   };
 
   const onClickSubmitSubject = (e) => {
-    if (user && user.role !== "DEALING_OFFICER") {
+    if (user && user.role === "BDO") {
       tickets(ticketType !== null ? ticketType : "NEW", 1, 15, null, subject);
       setSearchEnabled(true);
+    } else if (user && user.role === "CC_OFFICER") {
+      console.log("CC_OFFICER new ticket");
+      tickets(
+        ticketType !== null ? ticketType : "NEW",
+        1,
+        15,
+        user == null ? null : user._id + "Creator"
+      );
     } else {
       tickets(
         ticketType !== null ? ticketType : "NEW",
@@ -155,8 +182,16 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
   };
 
   const onClickCancel = (e) => {
-    if (user && user.role !== "DEALING_OFFICER") {
+    if (user && user.role === "BDO") {
       tickets(ticketType !== null ? ticketType : "NEW", pageNumber, 15);
+    } else if (user && user.role === "CC_OFFICER") {
+      console.log("CC_OFFICER new ticket");
+      tickets(
+        ticketType !== null ? ticketType : "NEW",
+        pageNumber,
+        15,
+        user == null ? null : user._id + "Creator"
+      );
     } else {
       tickets(
         ticketType !== null ? ticketType : "NEW",
@@ -318,18 +353,14 @@ function TicketsTable({ user, tickets, newTickets, ticketType }) {
                                   ticket.createDate.indexOf("T")
                                 )}
                           </StyledTableCell>
-                        ) : (
-                          <></>
-                        )}
+                        ) : null}
                         {user?.role !== "CC_OFFICER" ? (
                           <StyledTableCell align="center">
                             {ticket?.assignedTo?.name == null
                               ? null
                               : ticket?.assignedTo?.name}
                           </StyledTableCell>
-                        ) : (
-                          <></>
-                        )}
+                        ) : null}
                       </TableRow>
                     );
                   }

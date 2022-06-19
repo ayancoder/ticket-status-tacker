@@ -88,7 +88,6 @@ function Dashboard({ auth }) {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    console.log(auth);
     dispatch(getcountticketstypes());
   }, []);
 

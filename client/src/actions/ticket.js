@@ -26,7 +26,13 @@ export const tickets =
         "&limit=" +
         limit;
       if (assign != null) {
-        fetchTicket = fetchTicket + "&assignedTo=" + assign;
+        console.log("HERE WITH ASSIGN " + assign);
+        if (assign.includes("Creator")) {
+          fetchTicket =
+            fetchTicket + "&creator=" + assign.replace("Creator", "");
+        } else {
+          fetchTicket = fetchTicket + "&assignedTo=" + assign;
+        }
       }
       if (subject != null) {
         fetchTicket = fetchTicket + "&subject=" + subject;
