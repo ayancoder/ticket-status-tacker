@@ -12,6 +12,7 @@ import { loadUser } from "./actions/auth";
 import ReportGenerate from "./components/report/ReportGenerate";
 import setAuthToken from "./utils/setAuthToken";
 import PrivateRoute from "./components/routing/PrivateRoute";
+import Profile from "./components/profile/Profile";
 
 // Redux
 import { Provider } from "react-redux";
@@ -83,6 +84,7 @@ const App = () => {
               ></Route>
               <Route exact path="/newTicket" component={NewTicket}></Route>
               <Route exact path="/report" component={ReportGenerate}></Route>
+              <Route exact path="/profile" component={Profile}></Route>
             </Switch>
           </section>
         </Fragment>

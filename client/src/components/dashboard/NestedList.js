@@ -58,6 +58,11 @@ function NestedList({ auth }) {
     e.stopPropagation();
   };
 
+  const profileButtonHandler = (e) => {
+    history.push("/profile");
+    e.stopPropagation();
+  };
+
   return (
     <List
       component="nav"
@@ -122,7 +127,7 @@ function NestedList({ auth }) {
           <ListItemText primary="Generate Report" />
         </ListItem>
       )}
-      <ListItem button>
+      <ListItem button onClick={profileButtonHandler}>
         <ListItemIcon>
           <AccountCircleIcon />
         </ListItemIcon>
