@@ -13,6 +13,7 @@ import {
   LOGOUT,
   LOGIN_ALERT_CLOSE,
   LOGIN_ALERT_OPEN,
+  FETCH_OFFICE,
 } from "./types";
 
 // Load User
@@ -36,46 +37,48 @@ export const loadUser = () => async (dispatch) => {
   }
 };
 
-export const register = (name, password, phone) => async (dispatch) => {
-  try {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    console.log("header", config);
-    const newUser = {
-      name,
+export const register =
+  (name, password, phone, officeId) => async (dispatch) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      console.log("header", config);
+      const newUser = {
+        name,
 
-      password,
-      phone,
-    };
-    const body = JSON.stringify(newUser);
-    console.log("body", body);
-    const res = await axios.post(
-      `http://${process.env.REACT_APP_SERVER}:5000/api/users`,
-      body,
-      config
-    );
+        password,
+        phone,
+        officeId,
+      };
+      const body = JSON.stringify(newUser);
+      console.log("body", body);
+      const res = await axios.post(
+        `http://${process.env.REACT_APP_SERVER}:5000/api/users`,
+        body,
+        config
+      );
 
-    console.log("successful post of user");
-    dispatch({
-      type: REGISTER_SUCCESS,
-      payload: res.data,
-    });
-  } catch (err) {
-    console.log("failed post ", err);
-    //const errors = err.response.data.errors;
+      console.log("successful post of user");
+      dispatch({
+        type: REGISTER_SUCCESS,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.log("failed post ", err);
+      //const errors = err.response.data.errors;
 
-    //if (errors) {
-    // errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
-    //}
+      //if (errors) {
+      // errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
+      //}
 
-    dispatch({
-      type: REGISTER_FAIL,
-    });
-  }
-};
+      dispatch({
+        type: REGISTER_FAIL,
+      });
+    }
+  };
 
 export const login = (password, phone) => async (dispatch) => {
   try {
@@ -138,4 +141,19 @@ export const closeSnackBar = () => async (dispatch) => {
   dispatch({
     type: LOGIN_ALERT_CLOSE,
   });
+};
+
+export const fetchOffice = () => async (dispatch) => {
+  try {
+    const res = await axios.get(
+      `http://${process.env.REACT_APP_SERVER}:5000/api/offices`
+    );
+    // console.log(res);
+    if (res) {
+      dispatch({
+        type: FETCH_OFFICE,
+        office: res?.data,
+      });
+    }
+  } catch (e) {}
 };

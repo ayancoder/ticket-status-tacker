@@ -14,6 +14,17 @@ import { Link, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { setAlert } from "../../actions/alert";
 import { register } from "../../actions/auth";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import { useDispatch } from "react-redux";
+import { fetchOffice } from "../../actions/auth";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import Visibility from "@material-ui/icons/Visibility";
 
 function Copyright() {
   return (
@@ -48,29 +59,45 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Register = ({ setAlert, register, isAuthenticated }) => {
-  
+const Register = ({ setAlert, register, isAuthenticated, offices }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(fetchOffice());
+  }, []);
+
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    mobile:""
+    phone: "",
+    office: "",
   });
-  const { name, email, password,phone} = formData;
 
-  const onChange = (e) =>
+  const { name, email, password, phone, office } = formData;
+
+  const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    register(name, email, password,phone);
+    register(name, password, phone, office);
   };
 
-
-  if(isAuthenticated){
-    return <Redirect to="/dashboard"></Redirect>
+  if (isAuthenticated) {
+    return <Redirect to="/dashboard"></Redirect>;
   }
   return (
     <Container component="main" maxWidth="xs">
@@ -92,11 +119,10 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
                 required
                 fullWidth
                 id="name"
-                label="name"
+                label="Name"
                 autoFocus
                 value={name}
                 onChange={(e) => onChange(e)}
-                required
               />
             </Grid>
             <Grid item xs={12}>
@@ -111,7 +137,6 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => onChange(e)}
-                required
               />
             </Grid>
             <Grid item xs={12}>
@@ -120,28 +145,61 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
                 required
                 fullWidth
                 name="phone"
-                label="phone"
+                label="Phone"
                 type="phone"
                 id="phone"
                 value={phone}
                 onChange={(e) => onChange(e)}
-                required
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => onChange(e)}
-                required
-              />
+              <FormControl fullWidth variant="outlined">
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => onChange(e)}
+                  autoComplete="current-password"
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <InputLabel id="demo-multiple-name-label">Office*</InputLabel>
+                <Select
+                  id="office"
+                  name="office"
+                  value={office}
+                  variant="outlined"
+                  style={{ width: "25rem" }}
+                  onChange={(e) => onChange(e)}
+                  input={<OutlinedInput label="Name" />}
+                  required
+                >
+                  {offices?.map((x) => {
+                    return <MenuItem value={x._id}>{x.name}</MenuItem>;
+                  })}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
           <Button
@@ -174,6 +232,7 @@ Register.propTypes = {
 
 const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
+  offices: state?.auth?.office?.office,
 });
 
 export default connect(mapStateToProps, { setAlert, register })(Register);

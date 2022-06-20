@@ -8,6 +8,7 @@ import {
   FETCH_USERS_SUCCESS,
   LOGIN_ALERT_CLOSE,
   LOGIN_ALERT_OPEN,
+  FETCH_OFFICE,
 } from "../actions/types";
 
 const initialState = {
@@ -18,6 +19,7 @@ const initialState = {
   alertOpen: false,
   alertMsg: "",
   dealingOfficers: [],
+  office: [],
 };
 
 export default function (state = initialState, action) {
@@ -56,6 +58,7 @@ export default function (state = initialState, action) {
         dealingOfficers: action.dealingOfficers,
       };
     case LOGOUT:
+      localStorage.clear();
       return {
         ...state,
         isAuthenticated: false,
@@ -72,6 +75,11 @@ export default function (state = initialState, action) {
       return {
         ...state,
         alertOpen: false,
+      };
+    case FETCH_OFFICE:
+      return {
+        ...state,
+        office: action,
       };
     default:
       return state;
