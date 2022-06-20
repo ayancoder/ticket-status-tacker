@@ -25,6 +25,9 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import Visibility from "@material-ui/icons/Visibility";
+import { closeSnackBar } from "../../actions/auth";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
 
 function Copyright() {
   return (
@@ -37,6 +40,9 @@ function Copyright() {
       {"."}
     </Typography>
   );
+}
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -59,7 +65,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Register = ({ setAlert, register, isAuthenticated, offices }) => {
+const Register = ({
+  setAlert,
+  register,
+  isAuthenticated,
+  offices,
+  alertOpen,
+  closeSnackBar,
+  alertMsg,
+}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -75,6 +89,13 @@ const Register = ({ setAlert, register, isAuthenticated, offices }) => {
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    alertOpen = false;
+    closeSnackBar();
   };
 
   const [formData, setFormData] = useState({
@@ -218,6 +239,20 @@ const Register = ({ setAlert, register, isAuthenticated, offices }) => {
           </Grid>
         </form>
       </div>
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={2500}
+        onClose={handleClose}
+        style={{ width: "40rem" }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <Alert onClose={handleClose} severity="error">
+          Failed To Login , {alertMsg}
+        </Alert>
+      </Snackbar>
       <Box mt={5}>
         <Copyright />
       </Box>
@@ -233,6 +268,10 @@ Register.propTypes = {
 const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
   offices: state?.auth?.office?.office,
+  alertOpen: state?.auth?.alertOpen,
+  alertMsg: state?.auth?.alertMsg,
 });
 
-export default connect(mapStateToProps, { setAlert, register })(Register);
+export default connect(mapStateToProps, { setAlert, register, closeSnackBar })(
+  Register
+);

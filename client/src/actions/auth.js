@@ -73,7 +73,10 @@ export const register =
       //if (errors) {
       // errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
       //}
-
+      dispatch({
+        type: LOGIN_ALERT_OPEN,
+        alertMsg: err?.response?.data?.errors[0]?.msg,
+      });
       dispatch({
         type: REGISTER_FAIL,
       });
